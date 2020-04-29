@@ -14,8 +14,9 @@
 	// Add the IDs of extensions you want installed when the container is created.
 	"extensions": [
 		"ms-vscode.go"
-	]
+	],
 
+	"mounts": [ "source=${localEnv:HOME}/.ssh,target=/root/.ssh,type=bind" ]
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
 	// "forwardPorts": [],
 
