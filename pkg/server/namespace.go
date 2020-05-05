@@ -8,7 +8,7 @@ import (
 
 type NamespaceServer struct {
 	Handler http.Handler
-	router *mux.Router
+	router  *mux.Router
 }
 
 // New returns a new instance of the Server
@@ -38,13 +38,13 @@ func (s *NamespaceServer) PostNamespaceHandler(w http.ResponseWriter, r *http.Re
 }
 
 func (s *NamespaceServer) GetNamespaceHandler(w http.ResponseWriter, r *http.Request) {
-	
+
 }
 
 func (s *NamespaceServer) PutNamespaceHandler(w http.ResponseWriter, r *http.Request) {
-	
+
 }
 
 func (s *NamespaceServer) DeleteNamespaceHandler(w http.ResponseWriter, r *http.Request) {
-	
+
 }

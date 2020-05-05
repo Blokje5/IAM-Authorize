@@ -18,7 +18,7 @@ type Postgres struct {
 }
 
 // New returns a new reference to a Postgres Instance
-func New(config PostgresConfig) *Postgres  {
+func New(config PostgresConfig) *Postgres {
 	p := &Postgres{
 		config: config,
 	}
@@ -45,14 +45,14 @@ func (p *Postgres) Initialize(ctx context.Context) (*sql.DB, error) {
 	}
 
 	m, err := migrate.NewWithDatabaseInstance(
-        "file:///migrations",
-        "postgres", driver)
-	
-	version, dirty, err :=	m.Version()
+		"file:///migrations",
+		"postgres", driver)
+
+	version, dirty, err := m.Version()
 	if err != nil {
 		return nil, fmt.Errorf("error fetching migration version: %w", err)
 	}
-	
+
 	if dirty {
 		return nil, fmt.Errorf("database in invalid state after previous migration")
 	}

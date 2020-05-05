@@ -4,9 +4,9 @@ import "time"
 
 // Audit is a composition object that can be insterted into other objects to maintain audit information
 type Audit struct {
-	createdBy string
+	createdBy      string
 	lastModifiedBy string
-	createdAt time.Time
+	createdAt      time.Time
 	lastModifiedAt time.Time
 }
 
@@ -15,9 +15,9 @@ func NewAudit(creator string) Audit {
 	ts := time.Now()
 
 	return Audit{
-		createdBy: creator,
+		createdBy:      creator,
 		lastModifiedBy: creator,
-		createdAt: ts,
+		createdAt:      ts,
 		lastModifiedAt: ts,
 	}
 }

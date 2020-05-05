@@ -5,9 +5,9 @@ import "context"
 // Namespace represents a scoped authorization namespace
 // E.g. the Namespace users would be the namespace for authorization requests related to users
 type Namespace struct {
-	id int
+	id    int
 	audit Audit
-	name string
+	name  string
 }
 
 // ListNamespaces returns a list of all namespaces available to the user

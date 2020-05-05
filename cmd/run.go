@@ -11,8 +11,6 @@ import (
 	"github.com/spf13/viper"
 )
 
-
-
 func init() {
 
 	runCommand := &cobra.Command{
@@ -31,7 +29,6 @@ func init() {
 
 func run() {
 	ctx := context.Background()
-
 
 	params := server.NewParams()
 	viper.Unmarshal(&params)
