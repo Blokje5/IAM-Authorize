@@ -10,5 +10,6 @@ require (
 	github.com/jackc/pgx v3.6.2+incompatible
 	github.com/lib/pq v1.5.0 // indirect
 	github.com/shopspring/decimal v1.2.0 // indirect
+	github.com/spf13/cobra v1.0.0
 	golang.org/x/crypto v0.0.0-20200429183012-4b2356b1ed79 // indirect
 )
