@@ -9,6 +9,17 @@ import (
 	"github.com/gorilla/mux"
 )
 
+
+// Params represents the configuration of the server
+type Params struct {
+	ConnectionString string
+}
+
+// NewParams returns a pointer to a new instance of the params struct
+func NewParams() *Params {
+	return &Params{}
+}
+
 // Server represents an instance of the IAM-authorize server
 type Server struct {
 	Handler http.Handler
@@ -17,11 +28,14 @@ type Server struct {
 	NamespaceServer
 
 	storage *storage.Storage
+	params *Params
 }
 
 // New returns a new instance of the Server
-func New() *Server {
-	s := Server{}
+func New(params *Params) *Server {
+	s := Server{
+		params: params,
+	}
 	return &s
 }
 
@@ -34,7 +48,7 @@ func (s *Server) Init(ctx context.Context) error{
 	
 	s.router = r
 
-	pdb := postgres.New(postgres.PostgresConfig{})
+	pdb := postgres.New(postgres.PostgresConfig{ConnectionString: s.params.ConnectionString})
 	db, err := pdb.Initialize(ctx)
 	if err != nil {
 		return err
