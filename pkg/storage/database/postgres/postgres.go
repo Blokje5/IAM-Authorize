@@ -3,10 +3,14 @@ package postgres
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
+	"net/url"
 
 	"github.com/golang-migrate/migrate/v4"
-	"github.com/golang-migrate/migrate/v4/database/postgres"
+	// Migration Driver
+	_ "github.com/golang-migrate/migrate/v4/database/postgres"
+	_ "github.com/golang-migrate/migrate/v4/source/file"
 
 	// Used as SQL driver
 	_ "github.com/jackc/pgx"
@@ -14,11 +18,11 @@ import (
 
 // Postgres implements the DB interface and wraps a PG sql.DB instance
 type Postgres struct {
-	config PostgresConfig
+	config *PostgresConfig
 }
 
 // New returns a new reference to a Postgres Instance
-func New(config PostgresConfig) *Postgres {
+func New(config *PostgresConfig) *Postgres {
 	p := &Postgres{
 		config: config,
 	}
@@ -39,17 +43,15 @@ func (p *Postgres) Initialize(ctx context.Context) (*sql.DB, error) {
 		return nil, fmt.Errorf("ping failed: %w", err)
 	}
 
-	driver, err := postgres.WithInstance(db, &postgres.Config{})
+	m, err := migrate.New(
+		addFileScheme(p.config.MigrationPath),
+		p.config.ConnectionString)
 	if err != nil {
-		return nil, fmt.Errorf("error returning database driver: %w", err)
+		return nil, fmt.Errorf("error fetching migration configuration: %w", err)
 	}
 
-	m, err := migrate.NewWithDatabaseInstance(
-		"file:///migrations",
-		"postgres", driver)
-
 	version, dirty, err := m.Version()
-	if err != nil {
+	if err != nil && !errors.Is(err, migrate.ErrNilVersion) {
 		return nil, fmt.Errorf("error fetching migration version: %w", err)
 	}
 
@@ -63,4 +65,11 @@ func (p *Postgres) Initialize(ctx context.Context) (*sql.DB, error) {
 	}
 
 	return db, nil
+}
+
+func addFileScheme(p string) string {
+	u := url.URL{}
+	u.Scheme = "file"
+	u.Path = p
+	return u.String()
 }

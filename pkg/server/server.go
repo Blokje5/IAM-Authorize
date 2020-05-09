@@ -47,7 +47,9 @@ func (s *Server) Init(ctx context.Context) error {
 
 	s.router = r
 
-	pdb := postgres.New(postgres.PostgresConfig{ConnectionString: s.params.ConnectionString})
+	pgConfig := postgres.NewConfig().SetConnectionString(s.params.ConnectionString)
+
+	pdb := postgres.New(pgConfig)
 	db, err := pdb.Initialize(ctx)
 	if err != nil {
 		return err
