@@ -41,10 +41,6 @@ func New(params *Params) *Server {
 // Init initializes the server
 func (s *Server) Init(ctx context.Context) error {
 	r := mux.NewRouter()
-
-	nr := r.PathPrefix("/namespaces").Subrouter()
-	s.NamespaceServer.Init(nr)
-
 	s.router = r
 
 	pgConfig := postgres.NewConfig().SetConnectionString(s.params.ConnectionString)
@@ -56,5 +52,17 @@ func (s *Server) Init(ctx context.Context) error {
 	}
 	storage := storage.New(db)
 	s.storage = storage
+
+	nr := r.PathPrefix("/namespaces").Subrouter()
+	s.NamespaceServer.Init(nr, storage)
+	return nil
+}
+
+// Run runs the server until it is stopped
+func (s *Server) Run(ctx context.Context) error {
+	if err := http.ListenAndServe(":8080", s.router); err != nil {
+		return err
+	}
+
 	return nil
 }

@@ -37,4 +37,9 @@ func run() {
 		fmt.Println(err)
 		os.Exit(1)
 	}
+
+	if err := server.Run(ctx); err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
 }
