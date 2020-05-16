@@ -50,7 +50,7 @@ func (p *Postgres) Initialize(ctx context.Context) (*sql.DB, error) {
 		return nil, fmt.Errorf("error fetching migration configuration: %w", err)
 	}
 
-	version, dirty, err := m.Version()
+	_, dirty, err := m.Version()
 	if err != nil && !errors.Is(err, migrate.ErrNilVersion) {
 		return nil, fmt.Errorf("error fetching migration version: %w", err)
 	}
@@ -59,8 +59,8 @@ func (p *Postgres) Initialize(ctx context.Context) (*sql.DB, error) {
 		return nil, fmt.Errorf("database in invalid state after previous migration")
 	}
 
-	err = m.Migrate(version)
-	if err != nil {
+	err = m.Up()
+	if err != nil && err != migrate.ErrNoChange {
 		return nil, fmt.Errorf("database migration failed: %w", err)
 	}
 
