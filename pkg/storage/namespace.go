@@ -14,7 +14,7 @@ type Namespace struct {
 func (s *Storage) ListNamespaces(ctx context.Context) ([]Namespace, error) {
 	var namespaces []Namespace
 	rows, err := s.db.QueryContext(ctx,
-		"SELECT * from namespaces")
+		"SELECT id, name, created_by, last_modified_by, created_at, last_modified_at from namespaces")
 	if err != nil {
 		return nil, err
 	}
@@ -26,7 +26,7 @@ func (s *Storage) ListNamespaces(ctx context.Context) ([]Namespace, error) {
 
 	for rows.Next() {
 		var namespace Namespace
-		if err := rows.Scan(&namespace); err != nil {
+		if err := rows.Scan(&namespace.ID, &namespace.Name, &namespace.audit.createdBy, &namespace.audit.lastModifiedBy, &namespace.audit.createdAt, &namespace.audit.lastModifiedAt); err != nil {
 			return nil, err
 		}
 		namespaces = append(namespaces, namespace)
