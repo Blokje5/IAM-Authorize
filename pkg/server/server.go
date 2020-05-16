@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"github.com/blokje5/iam-server/pkg/log"
 	"github.com/blokje5/iam-server/pkg/storage"
 	"github.com/blokje5/iam-server/pkg/storage/database/postgres"
 	"net/http"
@@ -40,21 +41,29 @@ func New(params *Params) *Server {
 
 // Init initializes the server
 func (s *Server) Init(ctx context.Context) error {
+	log.Info("Initializing server")
 	r := mux.NewRouter()
 	s.router = r
 
 	pgConfig := postgres.NewConfig().SetConnectionString(s.params.ConnectionString)
-
+	log.Debugf("Connecting to database with connection string: %s", s.params.ConnectionString)
 	pdb := postgres.New(pgConfig)
+
+	log.Debug("Starting database initialization")
 	db, err := pdb.Initialize(ctx)
+	log.Debug("Completed database initialization")
+
 	if err != nil {
 		return err
 	}
 	storage := storage.New(db)
 	s.storage = storage
 
+	log.Debug("Initializing routers")
 	nr := r.PathPrefix("/namespaces").Subrouter()
 	s.NamespaceServer.Init(nr, storage)
+	log.Debug("Completed Initializing routers")
+
 	return nil
 }
 

@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	"github.com/blokje5/iam-server/pkg/log"
 	"os"
 
 	"github.com/blokje5/iam-server/cmd"
@@ -9,7 +9,7 @@ import (
 
 func main() {
 	if err := cmd.RootCommand.Execute(); err != nil {
-		fmt.Println(err)
+		log.Error(err)
 		os.Exit(1)
 	}
 }
