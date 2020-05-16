@@ -3,6 +3,7 @@ module github.com/blokje5/iam-server
 go 1.13
 
 require (
+	github.com/cenkalti/backoff/v4 v4.0.2
 	github.com/gofrs/uuid v3.2.0+incompatible // indirect
 	github.com/golang-migrate/migrate/v4 v4.10.0
 	github.com/gorilla/mux v1.7.4

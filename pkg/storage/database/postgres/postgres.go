@@ -2,10 +2,13 @@ package postgres
 
 import (
 	"context"
+	"time"
 	"database/sql"
 	"errors"
 	"fmt"
 	"net/url"
+
+	"github.com/cenkalti/backoff/v4"
 
 	"github.com/golang-migrate/migrate/v4"
 	// Migration Driver
@@ -38,7 +41,12 @@ func (p *Postgres) Initialize(ctx context.Context) (*sql.DB, error) {
 		return nil, fmt.Errorf("open db: %w", err)
 	}
 
-	err = db.PingContext(ctx)
+	b := backoff.NewExponentialBackOff()
+	b.MaxElapsedTime = time.Minute
+	op := func() error {
+		return db.PingContext(ctx)
+	}
+	err = backoff.Retry(op, b)
 	if err != nil {
 		return nil, fmt.Errorf("ping failed: %w", err)
 	}
