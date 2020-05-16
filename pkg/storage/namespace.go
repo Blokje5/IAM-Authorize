@@ -11,8 +11,8 @@ type Namespace struct {
 }
 
 // ListNamespaces returns a list of all namespaces available to the user
-func (s *Storage) ListNamespaces(ctx context.Context) ([]Namespace, error) {
-	var namespaces []Namespace
+func (s *Storage) ListNamespaces(ctx context.Context) ([]*Namespace, error) {
+	var namespaces []*Namespace
 	rows, err := s.db.QueryContext(ctx,
 		"SELECT id, name, created_by, last_modified_by, created_at, last_modified_at from namespaces")
 	if err != nil {
@@ -29,7 +29,7 @@ func (s *Storage) ListNamespaces(ctx context.Context) ([]Namespace, error) {
 		if err := rows.Scan(&namespace.ID, &namespace.Name, &namespace.audit.createdBy, &namespace.audit.lastModifiedBy, &namespace.audit.createdAt, &namespace.audit.lastModifiedAt); err != nil {
 			return nil, err
 		}
-		namespaces = append(namespaces, namespace)
+		namespaces = append(namespaces, &namespace)
 	}
 
 	if err := rows.Err(); err != nil {
@@ -40,29 +40,29 @@ func (s *Storage) ListNamespaces(ctx context.Context) ([]Namespace, error) {
 }
 
 // GetNamespace returns a namespace based on the ID
-func (s *Storage) GetNamespace(ctx context.Context, ID string) Namespace {
+func (s *Storage) GetNamespace(ctx context.Context, ID int) *Namespace {
 	var namespace Namespace
 	s.db.QueryRowContext(ctx, "SELECT id, name, created_by, last_modified_by, created_at, last_modified_at FROM namespaces WHERE id=$1;", ID).Scan(&namespace.ID, &namespace.Name, &namespace.audit.createdBy, &namespace.audit.lastModifiedBy, &namespace.audit.createdAt, &namespace.audit.lastModifiedAt)
 
-	return namespace
+	return &namespace
 }
 
 // InsertNamespace inserts the namespace into the database and returns the namespace with id
-func (s *Storage) InsertNamespace(ctx context.Context, namespace Namespace) Namespace {
+func (s *Storage) InsertNamespace(ctx context.Context, namespace Namespace) *Namespace {
 	var ID int
 	s.db.QueryRowContext(ctx, "INSERT INTO namespaces (name, created_by, last_modified_by, created_at, last_modified_at) VALUES ($1, $2, $3, $4, $5) RETURNING id;", namespace.Name, namespace.audit.createdBy, namespace.audit.createdBy, namespace.audit.createdAt, namespace.audit.createdAt).Scan(&ID)
 
 	namespace.ID = ID
-	return namespace
+	return &namespace
 }
 
 // UpdateNamespace updates the namespace (if there are changes) and returns the updated namespace object
-func (s *Storage) UpdateNamespace(ctx context.Context, namespace Namespace) Namespace {
+func (s *Storage) UpdateNamespace(ctx context.Context, namespace Namespace) *Namespace {
 	var ID int
-	s.db.QueryRowContext(ctx, "UPDATE namespaces SET (name, last_modified_by, last_modified_at) VALUES ($1, $2, $3) RETURNING id;", namespace.Name, namespace.audit.lastModifiedBy, namespace.audit.lastModifiedAt).Scan(&ID)
+	s.db.QueryRowContext(ctx, "UPDATE namespaces SET (name, last_modified_by, last_modified_at) VALUES ($1, $2, $3) WHERE id = $4 RETURNING id;", namespace.Name, namespace.audit.lastModifiedBy, namespace.audit.lastModifiedAt, namespace.ID).Scan(&ID)
 
 	namespace.ID = ID
-	return namespace
+	return &namespace
 }
 
 // DeleteNamespace deletes the namespace based on the ID
