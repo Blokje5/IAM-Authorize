@@ -13,6 +13,7 @@ import (
 // Params represents the configuration of the server
 type Params struct {
 	ConnectionString string
+	MigrationPath string
 }
 
 // NewParams returns a pointer to a new instance of the params struct
@@ -45,7 +46,7 @@ func (s *Server) Init(ctx context.Context) error {
 	r := mux.NewRouter()
 	s.router = r
 
-	pgConfig := postgres.NewConfig().SetConnectionString(s.params.ConnectionString)
+	pgConfig := postgres.NewConfig().SetConnectionString(s.params.ConnectionString).SetMigrationPath(s.params.MigrationPath)
 	log.Debugf("Connecting to database with connection string: %s", s.params.ConnectionString)
 	pdb := postgres.New(pgConfig)
 
@@ -64,6 +65,7 @@ func (s *Server) Init(ctx context.Context) error {
 	s.NamespaceServer.Init(nr, storage)
 	log.Debug("Completed Initializing routers")
 
+	s.Handler = r
 	return nil
 }
 

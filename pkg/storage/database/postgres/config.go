@@ -17,3 +17,10 @@ func (c *PostgresConfig) SetConnectionString(connectionString string) *PostgresC
 
 	return c
 }
+
+// SetMigrationPath sets the migration string parameter on the Config object
+func (c *PostgresConfig) SetMigrationPath(migrationpath string) *PostgresConfig {
+	c.MigrationPath = migrationpath
+
+	return c
+}

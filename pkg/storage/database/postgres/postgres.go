@@ -42,7 +42,7 @@ func (p *Postgres) Initialize(ctx context.Context) (*sql.DB, error) {
 	}
 
 	b := backoff.NewExponentialBackOff()
-	b.MaxElapsedTime = time.Minute
+	b.MaxElapsedTime = 10 * time.Second
 	op := func() error {
 		return db.PingContext(ctx)
 	}
