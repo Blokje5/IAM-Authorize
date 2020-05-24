@@ -71,7 +71,7 @@ func (f *fixture) executeRequestForHandler(handler http.Handler, req *http.Reque
 			f.t.Errorf("Expected JSON response from %v %v but got: %v", req.Method, req.URL, f.recorder)
 		}
 		var expected interface{}
-		if err := json.Unmarshal(f.recorder.Body.Bytes(), &result); err != nil {
+		if err := json.Unmarshal([]byte(resp), &expected); err != nil {
 			f.t.Fatalf("Unexpected error in expected response: %v", err)
 		}
 		if !reflect.DeepEqual(result, expected) {
