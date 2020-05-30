@@ -65,9 +65,9 @@ func (s *NamespaceServer) PostNamespaceHandler(w http.ResponseWriter, r *http.Re
 	namespace, err = s.storage.InsertNamespace(ctx, *namespace)
 	if err != nil {
 		if err == storage.ErrUniqueViolation {
-			http.Error(w, err.Error(), http.StatusConflict)
+			http.Error(w, NewConflictError("Conflict", "Uniqueness constraint violation").Error(), http.StatusConflict)
 		} else {
-			http.Error(w, err.Error(), http.StatusServiceUnavailable)
+			http.Error(w, NewInternalServerError("Internal server error", err.Error()).Error(), http.StatusInternalServerError)
 		}
 		return
 	}
@@ -75,7 +75,7 @@ func (s *NamespaceServer) PostNamespaceHandler(w http.ResponseWriter, r *http.Re
 	encoder := json.NewEncoder(w)
 	err = encoder.Encode(namespace)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Error(w, NewInternalServerError("Internal server error", err.Error()).Error(), http.StatusInternalServerError)
 		return
 	}
 }

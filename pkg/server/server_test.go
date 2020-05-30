@@ -34,8 +34,9 @@ func TestNamespaceServer_PostNamespaceHandler(t *testing.T) {
 	}
 
 	resp =  `{
-		"id": 1,
-		"name": "test"
+		"type":"http://localhost:8080/errors/conflict",
+		"title":"Conflict",
+		"detail":"Uniqueness constraint violation"
 	}`
 
 	f.executeRequestForHandler(f.server.Handler, req, 409, resp)
