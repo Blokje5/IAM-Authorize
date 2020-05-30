@@ -65,15 +65,28 @@ func newFixture(t *testing.T) *fixture {
 	
 	recorder := httptest.NewRecorder()
 
-	return &fixture{
+	f := &fixture{
 		server:   server,
 		recorder: recorder,
 		t:        t,
 	}
+	
+	// Register test cleanup function
+	t.Cleanup(f.cleanStorage)
+
+	return f
 }
 
 func (f *fixture) reset() {
 	f.recorder = httptest.NewRecorder()
+}
+
+func (f *fixture) cleanStorage() {
+	ctx := context.Background()
+	err := f.server.storage.Clean(ctx)
+	if err != nil {
+		f.t.Errorf("Failed to clean fixture: %v", err)
+	}
 }
 
 func (f *fixture) executeRequestForHandler(handler http.Handler, req *http.Request, code int, resp string) {
