@@ -1,13 +1,15 @@
 package postgres
 
 import (
+	"github.com/lib/pq"
 	"context"
-	"time"
 	"database/sql"
 	"errors"
 	"fmt"
 	"net/url"
+	"time"
 
+	"github.com/blokje5/iam-server/pkg/storage"
 	"github.com/cenkalti/backoff/v4"
 
 	"github.com/golang-migrate/migrate/v4"
@@ -73,6 +75,24 @@ func (p *Postgres) Initialize(ctx context.Context) (*sql.DB, error) {
 	}
 
 	return db, nil
+}
+
+// ProcessError handles any error thrown in the sql layer and checks if it is a known postgres error
+func (p *Postgres) ProcessError(err error) error {
+	if err, ok := err.(*pq.Error); ok {
+		return p.handlePGError(err)
+	}
+
+	return err
+}
+
+func (p *Postgres) handlePGError(e *pq.Error) error {
+	switch e.Code {
+	case "23505": // Unique violation
+		return storage.ErrUniqueViolation
+	}
+
+	return storage.ErrDatabase
 }
 
 func addFileScheme(p string) string {

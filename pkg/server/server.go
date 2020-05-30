@@ -57,7 +57,7 @@ func (s *Server) Init(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
-	storage := storage.New(db)
+	storage := storage.New(db, pdb)
 	s.storage = storage
 
 	log.Debug("Initializing routers")

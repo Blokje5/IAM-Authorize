@@ -59,13 +59,24 @@ func (s *NamespaceServer) PostNamespaceHandler(w http.ResponseWriter, r *http.Re
 	err := decoder.Decode(&namespace)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
 	}
-	namespace = s.storage.InsertNamespace(ctx, *namespace)
+
+	namespace, err = s.storage.InsertNamespace(ctx, *namespace)
+	if err != nil {
+		if err == storage.ErrUniqueViolation {
+			http.Error(w, err.Error(), http.StatusConflict)
+		} else {
+			http.Error(w, err.Error(), http.StatusServiceUnavailable)
+		}
+		return
+	}
 
 	encoder := json.NewEncoder(w)
 	err = encoder.Encode(namespace)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 }
 
@@ -73,7 +84,7 @@ func (s *NamespaceServer) PostNamespaceHandler(w http.ResponseWriter, r *http.Re
 func (s *NamespaceServer) GetNamespaceHandler(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	vars := mux.Vars(r)
-	ID, err := strconv.Atoi(vars["id"])
+	ID, err := strconv.ParseInt(vars["id"], 10, 64)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
@@ -96,7 +107,7 @@ func (s *NamespaceServer) GetNamespaceHandler(w http.ResponseWriter, r *http.Req
 func (s *NamespaceServer) PutNamespaceHandler(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	vars := mux.Vars(r)
-	ID, err := strconv.Atoi(vars["id"])
+	ID, err := strconv.ParseInt(vars["id"], 10, 64)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
@@ -130,7 +141,7 @@ func (s *NamespaceServer) PutNamespaceHandler(w http.ResponseWriter, r *http.Req
 func (s *NamespaceServer) DeleteNamespaceHandler(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	vars := mux.Vars(r)
-	ID, err := strconv.Atoi(vars["id"])
+	ID, err := strconv.ParseInt(vars["id"], 10, 64)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return

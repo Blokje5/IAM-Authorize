@@ -28,6 +28,17 @@ func TestNamespaceServer_PostNamespaceHandler(t *testing.T) {
 
 	f.executeRequestForHandler(f.server.Handler, req, 200, resp)
 
+	req, err = http.NewRequest("POST", "http://localhost:8080/namespaces/", strings.NewReader(body))
+	if err != nil {
+		t.Fatalf("Could not create request: %v", err)
+	}
+
+	resp =  `{
+		"id": 1,
+		"name": "test"
+	}`
+
+	f.executeRequestForHandler(f.server.Handler, req, 409, resp)
 }
 
 type fixture struct {
@@ -42,6 +53,7 @@ func newFixture(t *testing.T) *fixture {
 
 	params := NewParams()
 	connString := os.Getenv("TEST_CONNECTIONSTRING")
+	connString = "postgresql://postgres@127.0.0.1:5432/iam_test?sslmode=disable&password=local"
 	params.ConnectionString = connString
 	params.MigrationPath = "../storage/database/postgres/migrations"
 
@@ -59,11 +71,17 @@ func newFixture(t *testing.T) *fixture {
 	}
 }
 
+func (f *fixture) reset() {
+	f.recorder = httptest.NewRecorder()
+}
+
 func (f *fixture) executeRequestForHandler(handler http.Handler, req *http.Request, code int, resp string) {
 	f.t.Helper()
+	f.reset()
 	handler.ServeHTTP(f.recorder, req)
 	if f.recorder.Code != code {
 		f.t.Errorf("Expected status code %v, instead got: %v", code, f.recorder.Code)
+		return
 	}
 	if resp != "" {
 		var result interface{}
