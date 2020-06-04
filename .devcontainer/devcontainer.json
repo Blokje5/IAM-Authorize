@@ -13,10 +13,11 @@
 	
 	// Add the IDs of extensions you want installed when the container is created.
 	"extensions": [
-		"ms-vscode.go"
+		"ms-vscode.go",
+		"ms-azuretools.vscode-docker"
 	],
 
-	"mounts": [ "source=${localEnv:HOME}/.ssh,target=/root/.ssh,type=bind" ]
+	"mounts": [ "source=${localEnv:HOME}/.ssh,target=/root/.ssh,type=bind", "source=/var/run/docker.sock,target=/var/run/docker-host.sock,type=bind" ]
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
 	// "forwardPorts": [],
 
