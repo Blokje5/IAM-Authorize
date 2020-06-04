@@ -73,12 +73,15 @@ func (s *Storage) InsertNamespace(ctx context.Context, namespace Namespace) (*Na
 }
 
 // UpdateNamespace updates the namespace (if there are changes) and returns the updated namespace object
-func (s *Storage) UpdateNamespace(ctx context.Context, namespace Namespace) *Namespace {
+func (s *Storage) UpdateNamespace(ctx context.Context, namespace Namespace) (*Namespace, error) {
 	var ID int64
-	s.db.QueryRowContext(ctx, "UPDATE namespaces SET (name, last_modified_by, last_modified_at) VALUES ($1, $2, $3) WHERE id = $4 RETURNING id;", namespace.Name, namespace.audit.lastModifiedBy, namespace.audit.lastModifiedAt, namespace.ID).Scan(&ID)
+	err := s.db.QueryRowContext(ctx, "UPDATE namespaces SET name = $1, last_modified_by = $2, last_modified_at = $3 WHERE id = $4 RETURNING id;", namespace.Name, namespace.audit.lastModifiedBy, namespace.audit.lastModifiedAt, namespace.ID).Scan(&ID)
+	if err != nil {
+		return nil, s.database.ProcessError(err)
+	}
 
 	namespace.ID = ID
-	return &namespace
+	return &namespace, nil
 }
 
 // DeleteNamespace deletes the namespace based on the ID

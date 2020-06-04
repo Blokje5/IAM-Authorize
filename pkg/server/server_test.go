@@ -126,6 +126,31 @@ func TestNamespaceServer_DeleteNamespaceHandler(t *testing.T) {
 	f.executeRequestForHandler(f.server.Handler, req, 204, resp)
 }
 
+func TestNamespaceServer_PutNamespaceHandler(t *testing.T) {
+	f := newFixture(t)
+	_, err := f.server.storage.InsertNamespace(context.Background(), storage.Namespace{Name: "test"})
+	if err != nil {
+		t.Fatalf("Could not insert namespace: %v", err)
+	}
+
+	body := `{
+		"name": "test2"
+	}`
+	
+	req, err := http.NewRequest("PUT", "http://localhost:8080/namespaces/1", strings.NewReader(body))
+	if err != nil {
+		t.Fatalf("Could not create request: %v", err)
+	}
+
+	resp :=  `{
+		"id": 1,
+		"name": "test2"
+	}`
+
+
+	f.executeRequestForHandler(f.server.Handler, req, 200, resp)
+}
+
 type fixture struct {
 	server   *Server
 	recorder *httptest.ResponseRecorder

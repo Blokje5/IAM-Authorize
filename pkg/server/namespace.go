@@ -129,12 +129,15 @@ func (s *NamespaceServer) PutNamespaceHandler(w http.ResponseWriter, r *http.Req
 
 	namespace.Name = newNamespace.Name
 
-	newNamespace = s.storage.UpdateNamespace(ctx, *namespace)
+	newNamespace, err = s.storage.UpdateNamespace(ctx, *namespace)
+	if err != nil {
+		http.Error(w, NewInternalServerError("Internal server error", err.Error()).Error(), http.StatusInternalServerError)
+	}
 
 	encoder := json.NewEncoder(w)
 	err = encoder.Encode(newNamespace)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Error(w, NewInternalServerError("Internal server error", err.Error()).Error(), http.StatusInternalServerError)
 	}
 }
 
