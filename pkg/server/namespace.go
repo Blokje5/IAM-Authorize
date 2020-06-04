@@ -2,6 +2,7 @@ package server
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -90,16 +91,16 @@ func (s *NamespaceServer) GetNamespaceHandler(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	namespace := s.storage.GetNamespace(ctx, ID)
-	if namespace == nil {
-		http.Error(w, err.Error(), http.StatusNotFound)
+	namespace, err := s.storage.GetNamespace(ctx, ID)
+	if err != nil || namespace == nil {
+		http.Error(w, NewNotFoundError("Not Found", fmt.Sprintf("Namespace with ID: %v not found", ID)).Error(), http.StatusNotFound)
 		return
 	}
 
 	encoder := json.NewEncoder(w)
 	err = encoder.Encode(namespace)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Error(w, NewInternalServerError("Internal server error", err.Error()).Error(), http.StatusInternalServerError)
 	}
 }
 
@@ -113,8 +114,8 @@ func (s *NamespaceServer) PutNamespaceHandler(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	namespace := s.storage.GetNamespace(ctx, ID)
-	if namespace == nil {
+	namespace, err := s.storage.GetNamespace(ctx, ID)
+	if err != nil || namespace == nil {
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return
 	}

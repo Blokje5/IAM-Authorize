@@ -9,6 +9,7 @@ import (
 	"os"
 	"reflect"
 	"testing"
+	"github.com/blokje5/iam-server/pkg/storage"
 )
 
 func TestNamespaceServer_PostNamespaceHandler(t *testing.T) {
@@ -41,6 +42,40 @@ func TestNamespaceServer_PostNamespaceHandler(t *testing.T) {
 
 	f.executeRequestForHandler(f.server.Handler, req, 409, resp)
 }
+
+func TestNamespaceServer_GetNamespaceHandler(t *testing.T) {
+	f := newFixture(t)
+	req, err := http.NewRequest("GET", "http://localhost:8080/namespaces/1", nil)
+	if err != nil {
+		t.Fatalf("Could not create request: %v", err)
+	}
+
+	resp :=  `{
+		"type":"http://localhost:8080/errors/not-found",
+		"title":"Not Found",
+		"detail":"Namespace with ID: 1 not found"
+	}`
+	
+	f.executeRequestForHandler(f.server.Handler, req, 404, resp)
+
+	f.server.storage.InsertNamespace(context.Background(), storage.Namespace{Name: "test"})
+	if err != nil {
+		t.Fatalf("Could not insert namespace: %v", err)
+	}
+
+	req, err = http.NewRequest("GET", "http://localhost:8080/namespaces/1", nil)
+	if err != nil {
+		t.Fatalf("Could not create request: %v", err)
+	}
+
+	resp =  `{
+		"id": 1,
+		"name": "test"
+	}`
+
+	f.executeRequestForHandler(f.server.Handler, req, 200, resp)
+}
+
 
 type fixture struct {
 	server   *Server

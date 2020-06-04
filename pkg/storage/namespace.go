@@ -40,11 +40,14 @@ func (s *Storage) ListNamespaces(ctx context.Context) ([]*Namespace, error) {
 }
 
 // GetNamespace returns a namespace based on the ID
-func (s *Storage) GetNamespace(ctx context.Context, ID int64) *Namespace {
+func (s *Storage) GetNamespace(ctx context.Context, ID int64) (*Namespace, error) {
 	var namespace Namespace
-	s.db.QueryRowContext(ctx, "SELECT id, name, created_by, last_modified_by, created_at, last_modified_at FROM namespaces WHERE id=$1;", ID).Scan(&namespace.ID, &namespace.Name, &namespace.audit.createdBy, &namespace.audit.lastModifiedBy, &namespace.audit.createdAt, &namespace.audit.lastModifiedAt)
-
-	return &namespace
+	err := s.db.QueryRowContext(ctx, "SELECT id, name, created_by, last_modified_by, created_at, last_modified_at FROM namespaces WHERE id=$1;", ID).Scan(&namespace.ID, &namespace.Name, &namespace.audit.createdBy, &namespace.audit.lastModifiedBy, &namespace.audit.createdAt, &namespace.audit.lastModifiedAt)
+	if err != nil {
+		return nil, s.database.ProcessError(err)
+	}
+	
+	return &namespace, nil
 }
 
 // InsertNamespace inserts the namespace into the database and returns the namespace with id

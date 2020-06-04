@@ -4,6 +4,7 @@ import "encoding/json"
 
 const (
 	ErrConflict = "/errors/conflict"
+	ErrNotFound = "/errors/not-found"
 	ErrInternalServer = "errors/internal-server"
 )
 
@@ -37,6 +38,11 @@ func NewErrorResponse(errorType, title, detail string) *ErrorResponse {
 // NewConflictError returns a new HTTP 409 Conflict error with the given message
 func NewConflictError(title, detail string) *ErrorResponse {
 	return NewErrorResponse(ErrConflict, title, detail)
+}
+
+// NewConflictError returns a new HTTP 404 Not Found error with the given message
+func NewNotFoundError(title, detail string)  *ErrorResponse {
+	return NewErrorResponse(ErrNotFound, title, detail)
 }
 
 // NewInternalServerError returns a new HTTP 500 Internal Server error with the given message
