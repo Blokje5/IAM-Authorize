@@ -42,13 +42,13 @@ func (s *NamespaceServer) ListNamespaceHandler(w http.ResponseWriter, r *http.Re
 	ctx := r.Context()
 	namespaceList, err := s.storage.ListNamespaces(ctx)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Error(w, NewInternalServerError("Internal server error", err.Error()).Error(), http.StatusInternalServerError)
 	}
 
 	encoder := json.NewEncoder(w)
 	err = encoder.Encode(namespaceList)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Error(w, NewInternalServerError("Internal server error", err.Error()).Error(), http.StatusInternalServerError)
 	}
 }
 

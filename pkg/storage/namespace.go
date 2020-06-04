@@ -10,9 +10,14 @@ type Namespace struct {
 	Name  string `json:"name"`
 }
 
+// NamespaceList represents a list of namespaces
+type NamespaceList struct {
+	Namespaces []Namespace `json:"namespaces"`
+}
+
 // ListNamespaces returns a list of all namespaces available to the user
-func (s *Storage) ListNamespaces(ctx context.Context) ([]*Namespace, error) {
-	var namespaces []*Namespace
+func (s *Storage) ListNamespaces(ctx context.Context) (*NamespaceList, error) {
+	var namespaces []Namespace
 	rows, err := s.db.QueryContext(ctx,
 		"SELECT id, name, created_by, last_modified_by, created_at, last_modified_at from namespaces")
 	if err != nil {
@@ -29,14 +34,19 @@ func (s *Storage) ListNamespaces(ctx context.Context) ([]*Namespace, error) {
 		if err := rows.Scan(&namespace.ID, &namespace.Name, &namespace.audit.createdBy, &namespace.audit.lastModifiedBy, &namespace.audit.createdAt, &namespace.audit.lastModifiedAt); err != nil {
 			return nil, err
 		}
-		namespaces = append(namespaces, &namespace)
+		namespaces = append(namespaces, namespace)
 	}
 
 	if err := rows.Err(); err != nil {
 		return nil, err
 	}
 
-	return namespaces, nil
+	// Ensures we do not have to deal with nil pointers, instead we get an empty list
+	if len(namespaces) == 0 {
+		namespaces = []Namespace{}
+	}
+
+	return &NamespaceList{Namespaces: namespaces}, nil
 }
 
 // GetNamespace returns a namespace based on the ID

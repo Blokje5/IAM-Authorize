@@ -58,7 +58,7 @@ func TestNamespaceServer_GetNamespaceHandler(t *testing.T) {
 	
 	f.executeRequestForHandler(f.server.Handler, req, 404, resp)
 
-	f.server.storage.InsertNamespace(context.Background(), storage.Namespace{Name: "test"})
+	_, err = f.server.storage.InsertNamespace(context.Background(), storage.Namespace{Name: "test"})
 	if err != nil {
 		t.Fatalf("Could not insert namespace: %v", err)
 	}
@@ -71,6 +71,39 @@ func TestNamespaceServer_GetNamespaceHandler(t *testing.T) {
 	resp =  `{
 		"id": 1,
 		"name": "test"
+	}`
+
+	f.executeRequestForHandler(f.server.Handler, req, 200, resp)
+}
+
+func TestNamespaceServer_ListNamespaceHandler(t *testing.T) {
+	f := newFixture(t)
+	req, err := http.NewRequest("GET", "http://localhost:8080/namespaces/", nil)
+	if err != nil {
+		t.Fatalf("Could not create request: %v", err)
+	}
+
+	resp :=  `{
+		"namespaces": []
+	}`
+	
+	f.executeRequestForHandler(f.server.Handler, req, 200, resp)
+
+	_, err = f.server.storage.InsertNamespace(context.Background(), storage.Namespace{Name: "test"})
+	if err != nil {
+		t.Fatalf("Could not insert namespace: %v", err)
+	}
+
+	req, err = http.NewRequest("GET", "http://localhost:8080/namespaces/", nil)
+	if err != nil {
+		t.Fatalf("Could not create request: %v", err)
+	}
+
+	resp =  `{
+		"namespaces": [{
+			"id": 1,
+			"name": "test"
+		}]
 	}`
 
 	f.executeRequestForHandler(f.server.Handler, req, 200, resp)
