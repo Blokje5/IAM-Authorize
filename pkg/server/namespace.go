@@ -149,5 +149,5 @@ func (s *NamespaceServer) DeleteNamespaceHandler(w http.ResponseWriter, r *http.
 	}
 
 	s.storage.DeleteNamespace(ctx, ID)
-	w.Write([]byte("Success"))
+	w.WriteHeader(204)
 }

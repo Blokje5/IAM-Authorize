@@ -109,6 +109,22 @@ func TestNamespaceServer_ListNamespaceHandler(t *testing.T) {
 	f.executeRequestForHandler(f.server.Handler, req, 200, resp)
 }
 
+func TestNamespaceServer_DeleteNamespaceHandler(t *testing.T) {
+	f := newFixture(t)
+	_, err := f.server.storage.InsertNamespace(context.Background(), storage.Namespace{Name: "test"})
+	if err != nil {
+		t.Fatalf("Could not insert namespace: %v", err)
+	}
+
+	req, err := http.NewRequest("DELETE", "http://localhost:8080/namespaces/1", nil)
+	if err != nil {
+		t.Fatalf("Could not create request: %v", err)
+	}
+
+	resp :=  ``
+
+	f.executeRequestForHandler(f.server.Handler, req, 204, resp)
+}
 
 type fixture struct {
 	server   *Server
