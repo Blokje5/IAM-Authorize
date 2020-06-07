@@ -24,6 +24,13 @@ func New(w io.Writer) *Logger {
 	}
 }
 
+func NewWithFlags(w io.Writer, flag int) *Logger {
+	return &Logger{
+		out: w,
+		logger: log.New(w, "", flag),
+	}
+}
+
 func (l *Logger) Debug(v ...interface{}) {
 	l.logger.Println(v...)
 }
