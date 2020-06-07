@@ -28,6 +28,7 @@ type Server struct {
 	router *mux.Router
 	NamespaceServer
 
+	logger *log.Logger
 	storage *storage.Storage
 	params  *Params
 }
@@ -36,23 +37,24 @@ type Server struct {
 func New(params *Params) *Server {
 	s := Server{
 		params: params,
+		logger: log.GetLogger(),
 	}
 	return &s
 }
 
 // Init initializes the server
 func (s *Server) Init(ctx context.Context) error {
-	log.Info("Initializing server")
+	s.logger.Info("Initializing server")
 	r := mux.NewRouter()
 	s.router = r
 
 	pgConfig := postgres.NewConfig().SetConnectionString(s.params.ConnectionString).SetMigrationPath(s.params.MigrationPath)
-	log.Debugf("Connecting to database with connection string: %s", s.params.ConnectionString)
+	s.logger.Debugf("Connecting to database with connection string: %s", s.params.ConnectionString)
 	pdb := postgres.New(pgConfig)
 
-	log.Debug("Starting database initialization")
+	s.logger.Debug("Starting database initialization")
 	db, err := pdb.Initialize(ctx)
-	log.Debug("Completed database initialization")
+	s.logger.Debug("Completed database initialization")
 
 	if err != nil {
 		return err
@@ -60,10 +62,10 @@ func (s *Server) Init(ctx context.Context) error {
 	storage := storage.New(db, pdb)
 	s.storage = storage
 
-	log.Debug("Initializing routers")
+	s.logger.Debug("Initializing routers")
 	nr := r.PathPrefix("/namespaces").Subrouter()
 	s.NamespaceServer.Init(nr, storage)
-	log.Debug("Completed Initializing routers")
+	s.logger.Debug("Completed Initializing routers")
 
 	s.Handler = r
 	return nil

@@ -1,6 +1,7 @@
 package server
 
 import (
+	"github.com/blokje5/iam-server/pkg/log"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -15,12 +16,15 @@ type NamespaceServer struct {
 	router  *mux.Router
 	storage *storage.Storage
 
+	logger *log.Logger
 	decoder json.Decoder
 }
 
-// New returns a new instance of the Server
+// NewNamespaceServer returns a new instance of the Namespace Server
 func NewNamespaceServer() *NamespaceServer {
-	s := NamespaceServer{}
+	s := NamespaceServer{
+		logger: log.GetLogger(),
+	}
 	return &s
 }
 
