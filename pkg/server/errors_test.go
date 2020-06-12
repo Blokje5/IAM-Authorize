@@ -11,8 +11,8 @@ func TestErrorResponse_Error(t *testing.T) {
 	}{
 		{
 			"Calling Error() an ErrorResponse returns a json string",
-			NewErrorResponse(ErrConflict, "Conflict", "Uniqueness constraint violation"),
-			`{"type":"http://localhost:8080/errors/conflict","title":"Conflict","detail":"Uniqueness constraint violation"}`,
+			NewErrorResponse(ErrConflict, "Conflict", "Uniqueness constraint violation", 409),
+			`{"type":"http://localhost:8080/errors/conflict","title":"Conflict","detail":"Uniqueness constraint violation","status":409}`,
 		},
 	}
 	for _, tc := range tests {
