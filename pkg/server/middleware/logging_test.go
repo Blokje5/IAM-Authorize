@@ -16,15 +16,13 @@ func Test_loggingHandler_ServeHTTP(t *testing.T) {
 	testHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 	})
-	middleware := loggingHandler{
-		h:      testHandler,
-		logger: testLogger,
-	}
+	middleware := NewLoggingMiddleware(testLogger)
 
+	handler := middleware(testHandler)
 	req := httptest.NewRequest("GET", "/namespaces/1", nil)
 	req.RemoteAddr = "127.0.0.1"
 	rr := httptest.NewRecorder()
-	middleware.ServeHTTP(rr, req)
+	handler.ServeHTTP(rr, req)
 
 	if rr.Code != 200 {
 		t.Fatalf("l.ServeHTTP(): Expected status code 200, instead got: %v", rr.Code)
