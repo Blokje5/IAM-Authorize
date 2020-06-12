@@ -5,12 +5,14 @@ bin:
 	mkdir -p bin
 
 # DEVELOPMENT ENVIRONMENT
-result = $(shell docker ps --format '{{.Names}}' | grep iam-postgres)
+result = $(shell docker ps -a --format '{{.Names}}' | grep iam-postgres)
 start_local_db:
 ifeq ($(result),iam-postgres)
-	echo "Already running"
+	@echo "Already exists"
+	@docker start iam-postgres
 else
-	docker run --name iam-postgres -e POSTGRES_USER=postgres -e POSTGRES_DB=iam_test -e POSTGRES_PASSWORD=local -p 5432:5432 -d postgres:12
+	@echo "Creating named container iam-postgres"
+	@docker run --name iam-postgres -e POSTGRES_USER=postgres -e POSTGRES_DB=iam_test -e POSTGRES_PASSWORD=local -p 5432:5432 -d postgres:12
 endif
 
 PG_URL ?= "postgresql://postgres@127.0.0.1:5432/iam_test?sslmode=disable&password=local"

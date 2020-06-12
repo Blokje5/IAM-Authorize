@@ -1,6 +1,7 @@
 package server
 
 import (
+	"github.com/blokje5/iam-server/pkg/server/middleware"
 	"context"
 	"github.com/blokje5/iam-server/pkg/log"
 	"github.com/blokje5/iam-server/pkg/storage"
@@ -64,7 +65,8 @@ func (s *Server) Init(ctx context.Context) error {
 
 	s.logger.Debug("Initializing routers")
 	nr := r.PathPrefix("/namespaces").Subrouter()
-	s.NamespaceServer.Init(nr, storage)
+	middleware := middleware.NewLoggingMiddleware(s.logger)
+	s.NamespaceServer.Init(nr, middleware, storage)
 	s.logger.Debug("Completed Initializing routers")
 
 	s.Handler = r

@@ -1,6 +1,7 @@
 package server
 
 import (
+	"github.com/blokje5/iam-server/pkg/server/middleware"
 	"github.com/blokje5/iam-server/pkg/log"
 	"encoding/json"
 	"fmt"
@@ -29,13 +30,13 @@ func NewNamespaceServer() *NamespaceServer {
 }
 
 // Init initializes the server
-func (s *NamespaceServer) Init(r *mux.Router, storage *storage.Storage) {
+func (s *NamespaceServer) Init(r *mux.Router, middleware middleware.Middleware, storage *storage.Storage) {
 
-	r.HandleFunc("/", s.ListNamespaceHandler).Methods("GET")
-	r.HandleFunc("/", s.PostNamespaceHandler).Methods("POST")
-	r.HandleFunc("/{id:[0-9]+}", s.GetNamespaceHandler).Methods("GET")
-	r.HandleFunc("/{id:[0-9]+}", s.PutNamespaceHandler).Methods("PUT")
-	r.HandleFunc("/{id:[0-9]+}", s.DeleteNamespaceHandler).Methods("DELETE")
+	r.Handle("/", middleware(http.HandlerFunc(s.ListNamespaceHandler))).Methods("GET")
+	r.Handle("/", middleware(http.HandlerFunc(s.PostNamespaceHandler))).Methods("POST")
+	r.Handle("/{id:[0-9]+}", middleware(http.HandlerFunc(s.GetNamespaceHandler))).Methods("GET")
+	r.Handle("/{id:[0-9]+}", middleware(http.HandlerFunc(s.PutNamespaceHandler))).Methods("PUT")
+	r.Handle("/{id:[0-9]+}", middleware(http.HandlerFunc(s.DeleteNamespaceHandler))).Methods("DELETE")
 
 	s.router = r
 	s.storage = storage
