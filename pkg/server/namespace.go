@@ -1,10 +1,10 @@
 package server
 
 import (
-	"github.com/blokje5/iam-server/pkg/server/middleware"
-	"github.com/blokje5/iam-server/pkg/log"
 	"encoding/json"
 	"fmt"
+	"github.com/blokje5/iam-server/pkg/log"
+	"github.com/blokje5/iam-server/pkg/server/middleware"
 	"net/http"
 	"strconv"
 
@@ -17,7 +17,7 @@ type NamespaceServer struct {
 	router  *mux.Router
 	storage *storage.Storage
 
-	logger *log.Logger
+	logger  *log.Logger
 	decoder json.Decoder
 }
 

@@ -1,9 +1,9 @@
 package server
 
 import (
-	"github.com/blokje5/iam-server/pkg/server/middleware"
 	"context"
 	"github.com/blokje5/iam-server/pkg/log"
+	"github.com/blokje5/iam-server/pkg/server/middleware"
 	"github.com/blokje5/iam-server/pkg/storage"
 	"github.com/blokje5/iam-server/pkg/storage/database/postgres"
 	"net/http"
@@ -14,7 +14,7 @@ import (
 // Params represents the configuration of the server
 type Params struct {
 	ConnectionString string
-	MigrationPath string
+	MigrationPath    string
 }
 
 // NewParams returns a pointer to a new instance of the params struct
@@ -29,7 +29,7 @@ type Server struct {
 	router *mux.Router
 	NamespaceServer
 
-	logger *log.Logger
+	logger  *log.Logger
 	storage *storage.Storage
 	params  *Params
 }
