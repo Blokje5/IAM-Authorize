@@ -56,7 +56,7 @@ func (s *Storage) GetNamespace(ctx context.Context, ID int64) (*Namespace, error
 	if err != nil {
 		return nil, s.database.ProcessError(err)
 	}
-	
+
 	return &namespace, nil
 }
 

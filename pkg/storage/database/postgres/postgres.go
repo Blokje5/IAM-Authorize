@@ -1,11 +1,11 @@
 package postgres
 
 import (
-	"github.com/lib/pq"
 	"context"
 	"database/sql"
 	"errors"
 	"fmt"
+	"github.com/lib/pq"
 	"net/url"
 	"time"
 

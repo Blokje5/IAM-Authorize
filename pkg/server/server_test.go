@@ -2,14 +2,14 @@ package server
 
 import (
 	"context"
-	"strings"
 	"encoding/json"
+	"github.com/blokje5/iam-server/pkg/storage"
 	"net/http"
 	"net/http/httptest"
 	"os"
 	"reflect"
+	"strings"
 	"testing"
-	"github.com/blokje5/iam-server/pkg/storage"
 )
 
 func TestNamespaceServer_PostNamespaceHandler(t *testing.T) {
@@ -22,7 +22,7 @@ func TestNamespaceServer_PostNamespaceHandler(t *testing.T) {
 		t.Fatalf("Could not create request: %v", err)
 	}
 
-	resp :=  `{
+	resp := `{
 		"id": 1,
 		"name": "test"
 	}`
@@ -34,8 +34,9 @@ func TestNamespaceServer_PostNamespaceHandler(t *testing.T) {
 		t.Fatalf("Could not create request: %v", err)
 	}
 
-	resp =  `{
+	resp = `{
 		"type":"http://localhost:8080/errors/conflict",
+		"status": 409,
 		"title":"Conflict",
 		"detail":"Uniqueness constraint violation"
 	}`
@@ -50,12 +51,13 @@ func TestNamespaceServer_GetNamespaceHandler(t *testing.T) {
 		t.Fatalf("Could not create request: %v", err)
 	}
 
-	resp :=  `{
+	resp := `{
 		"type":"http://localhost:8080/errors/not-found",
+		"status": 404,
 		"title":"Not Found",
 		"detail":"Namespace with ID: 1 not found"
 	}`
-	
+
 	f.executeRequestForHandler(f.server.Handler, req, 404, resp)
 
 	_, err = f.server.storage.InsertNamespace(context.Background(), storage.Namespace{Name: "test"})
@@ -68,7 +70,7 @@ func TestNamespaceServer_GetNamespaceHandler(t *testing.T) {
 		t.Fatalf("Could not create request: %v", err)
 	}
 
-	resp =  `{
+	resp = `{
 		"id": 1,
 		"name": "test"
 	}`
@@ -83,10 +85,10 @@ func TestNamespaceServer_ListNamespaceHandler(t *testing.T) {
 		t.Fatalf("Could not create request: %v", err)
 	}
 
-	resp :=  `{
+	resp := `{
 		"namespaces": []
 	}`
-	
+
 	f.executeRequestForHandler(f.server.Handler, req, 200, resp)
 
 	_, err = f.server.storage.InsertNamespace(context.Background(), storage.Namespace{Name: "test"})
@@ -99,7 +101,7 @@ func TestNamespaceServer_ListNamespaceHandler(t *testing.T) {
 		t.Fatalf("Could not create request: %v", err)
 	}
 
-	resp =  `{
+	resp = `{
 		"namespaces": [{
 			"id": 1,
 			"name": "test"
@@ -121,7 +123,7 @@ func TestNamespaceServer_DeleteNamespaceHandler(t *testing.T) {
 		t.Fatalf("Could not create request: %v", err)
 	}
 
-	resp :=  ``
+	resp := ``
 
 	f.executeRequestForHandler(f.server.Handler, req, 204, resp)
 }
@@ -136,17 +138,16 @@ func TestNamespaceServer_PutNamespaceHandler(t *testing.T) {
 	body := `{
 		"name": "test2"
 	}`
-	
+
 	req, err := http.NewRequest("PUT", "http://localhost:8080/namespaces/1", strings.NewReader(body))
 	if err != nil {
 		t.Fatalf("Could not create request: %v", err)
 	}
 
-	resp :=  `{
+	resp := `{
 		"id": 1,
 		"name": "test2"
 	}`
-
 
 	f.executeRequestForHandler(f.server.Handler, req, 200, resp)
 }
@@ -171,7 +172,7 @@ func newFixture(t *testing.T) *fixture {
 	if err := server.Init(ctx); err != nil {
 		t.Fatalf("Could not start server: %v", err)
 	}
-	
+
 	recorder := httptest.NewRecorder()
 
 	f := &fixture{
@@ -179,7 +180,7 @@ func newFixture(t *testing.T) *fixture {
 		recorder: recorder,
 		t:        t,
 	}
-	
+
 	// Register test cleanup function
 	t.Cleanup(f.cleanStorage)
 

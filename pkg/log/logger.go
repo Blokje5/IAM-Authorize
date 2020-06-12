@@ -1,8 +1,8 @@
 package log
 
 import (
-	"log"
 	"io"
+	"log"
 	"os"
 )
 
@@ -13,20 +13,20 @@ func GetLogger() *Logger {
 }
 
 type Logger struct {
-	out io.Writer
+	out    io.Writer
 	logger *log.Logger
 }
 
 func New(w io.Writer) *Logger {
 	return &Logger{
-		out: w,
+		out:    w,
 		logger: log.New(w, "", log.Llongfile|log.Lmicroseconds),
 	}
 }
 
 func NewWithFlags(w io.Writer, flag int) *Logger {
 	return &Logger{
-		out: w,
+		out:    w,
 		logger: log.New(w, "", flag),
 	}
 }

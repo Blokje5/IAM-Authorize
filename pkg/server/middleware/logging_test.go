@@ -31,6 +31,6 @@ func Test_loggingHandler_ServeHTTP(t *testing.T) {
 	got := b.String()
 	want := "127.0.0.1 GET /namespaces/1\n"
 	if got != want {
-        t.Errorf("l.ServeHTTP() = %q, want %q", got, want)
-    }
+		t.Errorf("l.ServeHTTP() = %q, want %q", got, want)
+	}
 }

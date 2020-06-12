@@ -3,17 +3,17 @@ package server
 import "encoding/json"
 
 const (
-	ErrConflict = "/errors/conflict"
-	ErrNotFound = "/errors/not-found"
+	ErrConflict       = "/errors/conflict"
+	ErrNotFound       = "/errors/not-found"
 	ErrInternalServer = "errors/internal-server"
 )
 
 // ErrorResponse wraps the error neatly in a RFC7807 problem
 type ErrorResponse struct {
 	ErrorType string `json:"type"`
-	Title string `json:"title"`
-	Detail string `json:"detail,omitempty"`
-	Status int `json:"status,omitempty"`
+	Title     string `json:"title"`
+	Detail    string `json:"detail,omitempty"`
+	Status    int    `json:"status,omitempty"`
 }
 
 func (e *ErrorResponse) Error() string {
@@ -31,9 +31,9 @@ func NewErrorResponse(errorType, title, detail string, status int) *ErrorRespons
 	errorPath := "http://localhost:8080" + errorType
 	return &ErrorResponse{
 		ErrorType: errorPath,
-		Title: title,
-		Detail: detail,
-		Status: status,
+		Title:     title,
+		Detail:    detail,
+		Status:    status,
 	}
 }
 
@@ -43,7 +43,7 @@ func NewConflictError(title, detail string) *ErrorResponse {
 }
 
 // NewConflictError returns a new HTTP 404 Not Found error with the given message
-func NewNotFoundError(title, detail string)  *ErrorResponse {
+func NewNotFoundError(title, detail string) *ErrorResponse {
 	return NewErrorResponse(ErrNotFound, title, detail, 404)
 }
 

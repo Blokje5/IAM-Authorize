@@ -24,6 +24,6 @@ clean_local:
 
 # TESTING
 test: start_local_db
-	export TEST_CONNECTIONSTRING=$(PG_URL) && go test ./...
+	export TEST_CONNECTIONSTRING=$(PG_URL) && go test ./... -cover
 
 .PHONY: build start_local_db run_local clean_local test result

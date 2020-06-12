@@ -1,22 +1,22 @@
 package storage
 
 import (
+	"context"
 	"database/sql"
 	"github.com/blokje5/iam-server/pkg/storage/database"
-	"context"
 )
 
 // Storage wraps the backend database
 // and implements all  methods necessary for storage
 type Storage struct {
-	db *sql.DB
+	db       *sql.DB
 	database database.Database
 }
 
 // New returns a new instance of the Storage with the given db as backend
 func New(db *sql.DB, database database.Database) *Storage {
 	return &Storage{
-		db: db,
+		db:       db,
 		database: database,
 	}
 }

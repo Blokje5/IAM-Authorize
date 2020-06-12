@@ -2,7 +2,6 @@ package middleware
 
 import "net/http"
 
-
 type Middleware func(http.Handler) http.Handler
 
 // New wraps a fn which type is func(w http.ResponseWriter, r *http.Request, next http.Handler) into a Middleware

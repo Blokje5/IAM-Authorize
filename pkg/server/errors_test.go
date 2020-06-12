@@ -5,9 +5,9 @@ import "testing"
 func TestErrorResponse_Error(t *testing.T) {
 
 	tests := []struct {
-		name   string
+		name          string
 		errorResponse *ErrorResponse
-		want string
+		want          string
 	}{
 		{
 			"Calling Error() an ErrorResponse returns a json string",
