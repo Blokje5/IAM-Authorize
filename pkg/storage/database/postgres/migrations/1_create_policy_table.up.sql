@@ -11,21 +11,22 @@ CREATE TYPE effect AS ENUM ('allow', 'deny');
 
 CREATE TABLE IF NOT EXISTS statements(
     id SERIAL PRIMARY KEY,
-    policy_id SERIAL REFERENCES policy(id) ON DELETE CASCADE
+    policy_id INTEGER REFERENCES policies(id) ON DELETE CASCADE,
     effect effect NOT NULL,
     actions TEXT[],
-    resources TEXT[],
+    resources TEXT[]
 );
 
-CREATE OR REPLACE FUNCTION insert_policy(_version VARCHAR (3), _created_by VARCHAR (300), _ast_modified_by VARCHAR (300), _created_at TIMESTAMP, _last_modified_at TIMESTAMP)
-RETURNS void
+CREATE OR REPLACE FUNCTION insert_policy(_version VARCHAR (3), _created_by VARCHAR (300), _last_modified_by VARCHAR (300), _created_at TIMESTAMP, _last_modified_at TIMESTAMP)
+RETURNS INTEGER
 AS $$
     INSERT INTO policies (version, created_by, last_modified_by, created_at, last_modified_at)
     VALUES (_version, _created_by, _last_modified_by, _created_at, _last_modified_at)
+    RETURNING ID
 $$
 LANGUAGE sql;
 
-CREATE OR REPLACE FUNCTION insert_statement(_policy_id UUID, _effect effect, _actions TEXT[], _resources TEXT[])
+CREATE OR REPLACE FUNCTION insert_statement(_policy_id INTEGER, _effect effect, _actions TEXT[], _resources TEXT[])
 RETURNS void
 AS $$
     INSERT INTO statements (policy_id, effect, actions, resources)
@@ -33,7 +34,7 @@ AS $$
 $$
 LANGUAGE sql;
 
-CREATE OR REPLACE FUNCTION query_policy(_id SERIAL)
+CREATE OR REPLACE FUNCTION query_policy(_id INTEGER)
 RETURNS json
 AS $$
     WITH data AS (

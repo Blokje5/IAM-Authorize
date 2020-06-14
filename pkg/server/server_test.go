@@ -152,6 +152,46 @@ func TestNamespaceServer_PutNamespaceHandler(t *testing.T) {
 	f.executeRequestForHandler(f.server.Handler, req, 200, resp)
 }
 
+func TestPolicyServer_PostNamespaceHandler(t *testing.T) {
+	f := newFixture(t)
+	body := `{
+		"version": "v1",
+		"statements": [
+			{
+				"effect": "allow",
+				"actions": [
+					"iam:CreatePolicy"
+				],
+				"resources": [
+					"*"
+				]
+			}
+		]
+	}`
+	req, err := http.NewRequest("POST", "http://localhost:8080/policies/", strings.NewReader(body))
+	if err != nil {
+		t.Fatalf("Could not create request: %v", err)
+	}
+
+	resp := `{
+		"id": 1,
+		"version": "v1",
+		"statements": [
+		  {
+			"Actions": [
+			  "iam:CreatePolicy"
+			],
+			"Effect": "allow",
+			"Resources": [
+			  "*"
+			]
+		  }
+		]
+	  }`
+
+	f.executeRequestForHandler(f.server.Handler, req, 200, resp)
+}
+
 type fixture struct {
 	server   *Server
 	recorder *httptest.ResponseRecorder
@@ -204,7 +244,7 @@ func (f *fixture) executeRequestForHandler(handler http.Handler, req *http.Reque
 	f.reset()
 	handler.ServeHTTP(f.recorder, req)
 	if f.recorder.Code != code {
-		f.t.Errorf("Expected status code %v, instead got: %v", code, f.recorder.Code)
+		f.t.Errorf("Expected status code %v, instead got: %v. body: %s", code, f.recorder.Code, f.recorder.Body.String())
 		return
 	}
 	if resp != "" {
