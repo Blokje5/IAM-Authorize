@@ -1,0 +1,7 @@
+DROP TABLE IF EXISTS policies;
+DROP TABLE IF EXISTS statements;
+DROP TYPE IF EXISTS effect;
+DROP FUNCTION IF EXISTS insert_policy;
+DROP FUNCTION IF EXISTS insert_statement;
+DROP FUNCTION IF EXISTS query_policy;
+DROP FUNCTION IF EXISTS query_policies;
