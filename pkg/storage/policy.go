@@ -1,10 +1,13 @@
 package storage
 
-import "context"
+import (
+	"context"
+	"encoding/json"
+	"errors"
+	"fmt"
 
-import "fmt"
-
-import "github.com/lib/pq"
+	"github.com/lib/pq"
+)
 
 // Policy represents an authorization policy
 // It determines whether User/Role/Service x is allowed to perform Action y on Resource z
@@ -29,6 +32,18 @@ func NewPolicy(statements []Statement) *Policy {
 		Version:    Version,
 		Statements: statements,
 	}
+}
+
+// Scan implements sql.Scanner interface to parse policy directly 
+func (p *Policy) Scan(src interface{}) error {
+	if src == nil {
+		return ErrNotFound
+	}
+	source, ok := src.([]byte)
+	if !ok {
+		return errors.New("type assertion .([]byte) failed")
+	}
+	return json.Unmarshal(source, p)
 }
 
 // InsertPolicy inserts a new policy into the data store
@@ -61,29 +76,16 @@ func (s *Storage) InsertPolicy(ctx context.Context, policy *Policy) (*Policy, er
 }
 
 // GetPolicy returns a policy based on the ID
-// func (s *Storage) GetPolicy(ctx context.Context, ID int64) (*Policy, error) {
-// 	var policy Policy
-// 	err := s.db.QueryRowContext(ctx, `SELECT 
-// 		id,
-// 		created_by,
-// 		last_modified_by,
-// 		created_at,
-// 		last_modified_at
-// 	FROM policy
-// 	WHERE id=$1;
-// 	`, ID).Scan(&policy.ID, &policy.audit.createdBy, &policy.audit.lastModifiedBy, &policy.audit.createdAt, &policy.audit.lastModifiedAt)
-// 	if err != nil {
-// 		return nil, s.database.ProcessError(err)
-// 	}
+func (s *Storage) GetPolicy(ctx context.Context, ID int64) (*Policy, error) {
+	var policy Policy
+	err := s.db.QueryRowContext(ctx, `SELECT query_policy($1);`, ID).Scan(&policy)
+	if err != nil {
+		fmt.Println(err)
+		return nil, s.database.ProcessError(err)
+	}
 
-// 	err := s.db.QueryContext(ctx, `SELECT
-// 		effect,
-// 		actions,
-// 		resources,
-// 	`
-
-// 	return &policy, nil
-// }
+	return &policy, nil
+}
 
 // Statement is a rule statement within a Policy
 type Statement struct {
@@ -93,7 +95,7 @@ type Statement struct {
 }
 
 // NewStatement creates a new statement based on the given list of resources & actions
-func NewStatement(effect Effect, resources, actions []string) *Statement {
+func NewStatement(effect Effect, resources, actions []string) Statement {
 	if actions == nil {
 		actions = []string{}
 	}
@@ -101,7 +103,7 @@ func NewStatement(effect Effect, resources, actions []string) *Statement {
 		resources = []string{}
 	}
 
-	return &Statement{
+	return Statement{
 		Effect:    effect,
 		Actions:   actions,
 		Resources: resources,

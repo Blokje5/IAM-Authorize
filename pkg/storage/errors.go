@@ -7,4 +7,6 @@ var (
 	ErrUniqueViolation = errors.New("Unique constraint violation")
 	// ErrDatabase handles uncaught database exceptions
 	ErrDatabase = errors.New("Internal Database Error")
+	// ErrNotFound handles empty data
+	ErrNotFound = errors.New("Did not found resource")
 )
