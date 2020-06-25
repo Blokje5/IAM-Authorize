@@ -34,7 +34,7 @@ func NewPolicy(statements []Statement) *Policy {
 	}
 }
 
-// Scan implements sql.Scanner interface to parse policy directly 
+// Scan implements sql.Scanner interface to parse policy directly
 func (p *Policy) Scan(src interface{}) error {
 	if src == nil {
 		return ErrNotFound
@@ -85,6 +85,34 @@ func (s *Storage) GetPolicy(ctx context.Context, ID int64) (*Policy, error) {
 	}
 
 	return &policy, nil
+}
+
+func (s *Storage) ListPolicies(ctx context.Context) ([]Policy, error) {
+	policies := []Policy{}
+	rows, err := s.db.QueryContext(ctx, `SELECT query_policies();`)
+	if err != nil {
+		fmt.Println(err)
+		return nil, s.database.ProcessError(err)
+	}
+	defer func() {
+		if err := rows.Close(); err != nil {
+			panic(err)
+		}
+	}()
+
+	for rows.Next() {
+		var policy Policy
+		if err := rows.Scan(&policy); err != nil {
+			return nil, err
+		}
+		policies = append(policies, policy)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return policies, nil
 }
 
 // Statement is a rule statement within a Policy

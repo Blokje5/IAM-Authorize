@@ -237,6 +237,48 @@ func TestPolicyServer_PostNamespaceHandler(t *testing.T) {
 	f.executeRequestForHandler(f.server.Handler, req, 200, resp)
 }
 
+func TestPolicyServer_ListNamespaceHandler(t *testing.T) {
+	f := newFixture(t)
+	req, err := http.NewRequest("GET", "http://localhost:8080/policies/", nil)
+	if err != nil {
+		t.Fatalf("Could not create request: %v", err)
+	}
+
+	resp := `[]`
+
+	f.executeRequestForHandler(f.server.Handler, req, 200, resp)
+
+	_, err = f.server.storage.InsertPolicy(context.Background(), storage.NewPolicy([]storage.Statement{storage.NewStatement(storage.Allow, []string{"*"}, []string{"iam:CreatePolicy"})}))
+	if err != nil {
+		t.Fatalf("Could not insert policy: %v", err)
+	}
+
+	req, err = http.NewRequest("GET", "http://localhost:8080/policies/", nil)
+	if err != nil {
+		t.Fatalf("Could not create request: %v", err)
+	}
+
+	resp = `[
+		{
+			"id": 1,
+			"version": "v1",
+			"statements": [
+				{
+				"Actions": [
+					"iam:CreatePolicy"
+				],
+				"Effect": "allow",
+				"Resources": [
+					"*"
+				]
+				}
+			]
+		}
+	]`
+
+	f.executeRequestForHandler(f.server.Handler, req, 200, resp)
+}
+
 type fixture struct {
 	server   *Server
 	recorder *httptest.ResponseRecorder

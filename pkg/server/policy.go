@@ -33,6 +33,7 @@ func NewPolicyServer() *PolicyServer {
 func (s *PolicyServer) Init(r *mux.Router, middleware middleware.Middleware, storage *storage.Storage) {
 
 	r.Handle("/", middleware(http.HandlerFunc(s.PostNamespaceHandler))).Methods("POST")
+	r.Handle("/", middleware(http.HandlerFunc(s.ListNamespaceHandler))).Methods("GET")
 	r.Handle("/{id:[0-9]+}", middleware(http.HandlerFunc(s.GetNamespaceHandler))).Methods("GET")
 
 	s.router = r
@@ -68,7 +69,7 @@ func (s *PolicyServer) PostNamespaceHandler(w http.ResponseWriter, r *http.Reque
 	}
 }
 
-// GetNamespaceHandler handles Get requests on the policy resource
+// GetNamespaceHandler handles Get requests on the policy resource by ID
 func (s *PolicyServer) GetNamespaceHandler(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	vars := mux.Vars(r)
@@ -86,6 +87,23 @@ func (s *PolicyServer) GetNamespaceHandler(w http.ResponseWriter, r *http.Reques
 
 	encoder := json.NewEncoder(w)
 	err = encoder.Encode(policy)
+	if err != nil {
+		http.Error(w, NewInternalServerError("Internal server error", err.Error()).Error(), http.StatusInternalServerError)
+		return
+	}
+}
+
+// ListNamespaceHandler handles Get requests on the policy resource
+func (s *PolicyServer) ListNamespaceHandler(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	policyList, err := s.storage.ListPolicies(ctx)
+	if err != nil {
+		http.Error(w, NewInternalServerError("Internal server error", err.Error()).Error(), http.StatusInternalServerError)
+	}
+
+	encoder := json.NewEncoder(w)
+	err = encoder.Encode(policyList)
 	if err != nil {
 		http.Error(w, NewInternalServerError("Internal server error", err.Error()).Error(), http.StatusInternalServerError)
 		return
