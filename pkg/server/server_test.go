@@ -279,6 +279,21 @@ func TestPolicyServer_ListNamespaceHandler(t *testing.T) {
 	f.executeRequestForHandler(f.server.Handler, req, 200, resp)
 }
 
+func TestPolicyServer_DeleteNamespaceHandler(t *testing.T) {
+	f := newFixture(t)
+	_, err := f.server.storage.InsertPolicy(context.Background(), storage.NewPolicy([]storage.Statement{storage.NewStatement(storage.Allow, []string{"*"}, []string{"iam:CreatePolicy"})}))
+	if err != nil {
+		t.Fatalf("Could not insert policy: %v", err)
+	}
+
+	req, err := http.NewRequest("DELETE", "http://localhost:8080/policies/1", nil)
+	if err != nil {
+		t.Fatalf("Could not create request: %v", err)
+	}
+
+	f.executeRequestForHandler(f.server.Handler, req, 204, "")
+}
+
 type fixture struct {
 	server   *Server
 	recorder *httptest.ResponseRecorder

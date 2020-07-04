@@ -115,6 +115,12 @@ func (s *Storage) ListPolicies(ctx context.Context) ([]Policy, error) {
 	return policies, nil
 }
 
+// DeletePolicy deletes a policy based on the ID
+func (s *Storage) DeletePolicy(ctx context.Context, ID int64) error {
+	_, err := s.db.ExecContext(ctx, "DELETE FROM policies WHERE id=$1;", ID)
+	return s.database.ProcessError(err)
+}
+
 // Statement is a rule statement within a Policy
 type Statement struct {
 	Effect    Effect

@@ -32,16 +32,17 @@ func NewPolicyServer() *PolicyServer {
 // Init initializes the server
 func (s *PolicyServer) Init(r *mux.Router, middleware middleware.Middleware, storage *storage.Storage) {
 
-	r.Handle("/", middleware(http.HandlerFunc(s.PostNamespaceHandler))).Methods("POST")
-	r.Handle("/", middleware(http.HandlerFunc(s.ListNamespaceHandler))).Methods("GET")
-	r.Handle("/{id:[0-9]+}", middleware(http.HandlerFunc(s.GetNamespaceHandler))).Methods("GET")
+	r.Handle("/", middleware(http.HandlerFunc(s.PostPolicyHandler))).Methods("POST")
+	r.Handle("/", middleware(http.HandlerFunc(s.ListPolicyHandler))).Methods("GET")
+	r.Handle("/{id:[0-9]+}", middleware(http.HandlerFunc(s.GetPolicyHandler))).Methods("GET")
+	r.Handle("/{id:[0-9]+}", middleware(http.HandlerFunc(s.DeletePolicyHandler))).Methods("DELETE")
 
 	s.router = r
 	s.storage = storage
 }
 
-// PostNamespaceHandler handles Post requests on the policy resource
-func (s *PolicyServer) PostNamespaceHandler(w http.ResponseWriter, r *http.Request) {
+// PostPolicyHandler handles Post requests on the policy resource
+func (s *PolicyServer) PostPolicyHandler(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	decoder := json.NewDecoder(r.Body)
 	var policy *storage.Policy
@@ -69,8 +70,8 @@ func (s *PolicyServer) PostNamespaceHandler(w http.ResponseWriter, r *http.Reque
 	}
 }
 
-// GetNamespaceHandler handles Get requests on the policy resource by ID
-func (s *PolicyServer) GetNamespaceHandler(w http.ResponseWriter, r *http.Request) {
+// GetPolicyHandler handles Get requests on the policy resource by ID
+func (s *PolicyServer) GetPolicyHandler(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	vars := mux.Vars(r)
 	ID, err := strconv.ParseInt(vars["id"], 10, 64)
@@ -93,8 +94,8 @@ func (s *PolicyServer) GetNamespaceHandler(w http.ResponseWriter, r *http.Reques
 	}
 }
 
-// ListNamespaceHandler handles Get requests on the policy resource
-func (s *PolicyServer) ListNamespaceHandler(w http.ResponseWriter, r *http.Request) {
+// ListPolicyHandler handles Get requests on the policy resource
+func (s *PolicyServer) ListPolicyHandler(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	policyList, err := s.storage.ListPolicies(ctx)
@@ -108,4 +109,22 @@ func (s *PolicyServer) ListNamespaceHandler(w http.ResponseWriter, r *http.Reque
 		http.Error(w, NewInternalServerError("Internal server error", err.Error()).Error(), http.StatusInternalServerError)
 		return
 	}
+}
+
+// DeletePolicyHandler handles Get requests on the policy resource
+func (s *PolicyServer) DeletePolicyHandler(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	vars := mux.Vars(r)
+	ID, err := strconv.ParseInt(vars["id"], 10, 64)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	err = s.storage.DeletePolicy(ctx, ID)
+	if err != nil {
+		http.Error(w, NewInternalServerError("Internal server error", err.Error()).Error(), http.StatusInternalServerError)
+	}
+
+	w.WriteHeader(204)
 }
