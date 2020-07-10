@@ -28,6 +28,7 @@ type Server struct {
 
 	router *mux.Router
 	NamespaceServer
+	PolicyServer
 
 	logger  *log.Logger
 	storage *storage.Storage
@@ -67,6 +68,9 @@ func (s *Server) Init(ctx context.Context) error {
 	nr := r.PathPrefix("/namespaces").Subrouter()
 	middleware := middleware.NewLoggingMiddleware(s.logger)
 	s.NamespaceServer.Init(nr, middleware, storage)
+
+	pr := r.PathPrefix("/policies").Subrouter()
+	s.PolicyServer.Init(pr, middleware, storage)
 	s.logger.Debug("Completed Initializing routers")
 
 	s.Handler = r

@@ -13,3 +13,11 @@ Namespace - A scope that is applied to both resources and actions. E.g. An actio
 ## Namespace management
 
 Administrators can create namespaces in this service. This provides an unique scope for a service to create policies in. For example, if you have an user management service, you could create a namespace `users`. Actions would be of the form `namespace:action`, e.g. `users:createUser`. The same holds true for resources, which are of the form `namespace:object_identifier` e.g. `users:1234` to identify the user with id 1234. Namespaces are validated on policy creation. This ensures that no incorrect policies are created.
+
+# Policy Management
+
+Administrators can set up policies in this service. They determine what actions are allowed to be performed on what resources. Policies are made up of Statements. A statement contains the following information:
+
+- An effect (either `allow` or `deny`)
+- A list of resources that the statement applies to. Resources are namespaced tuples of the form `namespace:resource_identifier`
+- A list of actions that are allowed or denied on the list of resources. Actions are namespaced tuples of the form `namespace:action`

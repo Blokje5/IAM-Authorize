@@ -92,7 +92,8 @@ func (p *Postgres) handlePGError(e *pq.Error) error {
 		return storage.ErrUniqueViolation
 	}
 
-	return storage.ErrDatabase
+	// storage.ErrDatabase
+	return e
 }
 
 func addFileScheme(p string) string {

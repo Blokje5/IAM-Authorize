@@ -152,6 +152,148 @@ func TestNamespaceServer_PutNamespaceHandler(t *testing.T) {
 	f.executeRequestForHandler(f.server.Handler, req, 200, resp)
 }
 
+func TestPolicyServer_GetNamespaceHandler(t *testing.T) {
+	f := newFixture(t)
+
+	req, err := http.NewRequest("GET", "http://localhost:8080/policies/1", nil)
+	if err != nil {
+		t.Fatalf("Could not create request: %v", err)
+	}
+
+	resp := `{
+		"type":"http://localhost:8080/errors/not-found",
+		"status": 404,
+		"title":"Not Found",
+		"detail":"Policy with ID: 1 not found"
+	}`
+	f.executeRequestForHandler(f.server.Handler, req, 404, resp)
+
+	_, err = f.server.storage.InsertPolicy(context.Background(), storage.NewPolicy([]storage.Statement{storage.NewStatement(storage.Allow, []string{"*"}, []string{"iam:CreatePolicy"})}))
+	if err != nil {
+		t.Fatalf("Could not insert policy: %v", err)
+	}
+
+	req, err = http.NewRequest("GET", "http://localhost:8080/policies/1", nil)
+	if err != nil {
+		t.Fatalf("Could not create request: %v", err)
+	}
+
+	resp = `{
+		"id": 1,
+		"version": "v1",
+		"statements": [
+		  {
+			"Actions": [
+			  "iam:CreatePolicy"
+			],
+			"Effect": "allow",
+			"Resources": [
+			  "*"
+			]
+		  }
+		]
+	  }`
+
+	f.executeRequestForHandler(f.server.Handler, req, 200, resp)
+}
+
+func TestPolicyServer_PostNamespaceHandler(t *testing.T) {
+	f := newFixture(t)
+	body := `{
+		"version": "v1",
+		"statements": [
+			{
+				"effect": "allow",
+				"actions": [
+					"iam:CreatePolicy"
+				],
+				"resources": [
+					"*"
+				]
+			}
+		]
+	}`
+	req, err := http.NewRequest("POST", "http://localhost:8080/policies/", strings.NewReader(body))
+	if err != nil {
+		t.Fatalf("Could not create request: %v", err)
+	}
+
+	resp := `{
+		"id": 1,
+		"version": "v1",
+		"statements": [
+		  {
+			"Actions": [
+			  "iam:CreatePolicy"
+			],
+			"Effect": "allow",
+			"Resources": [
+			  "*"
+			]
+		  }
+		]
+	  }`
+
+	f.executeRequestForHandler(f.server.Handler, req, 200, resp)
+}
+
+func TestPolicyServer_ListNamespaceHandler(t *testing.T) {
+	f := newFixture(t)
+	req, err := http.NewRequest("GET", "http://localhost:8080/policies/", nil)
+	if err != nil {
+		t.Fatalf("Could not create request: %v", err)
+	}
+
+	resp := `[]`
+
+	f.executeRequestForHandler(f.server.Handler, req, 200, resp)
+
+	_, err = f.server.storage.InsertPolicy(context.Background(), storage.NewPolicy([]storage.Statement{storage.NewStatement(storage.Allow, []string{"*"}, []string{"iam:CreatePolicy"})}))
+	if err != nil {
+		t.Fatalf("Could not insert policy: %v", err)
+	}
+
+	req, err = http.NewRequest("GET", "http://localhost:8080/policies/", nil)
+	if err != nil {
+		t.Fatalf("Could not create request: %v", err)
+	}
+
+	resp = `[
+		{
+			"id": 1,
+			"version": "v1",
+			"statements": [
+				{
+				"Actions": [
+					"iam:CreatePolicy"
+				],
+				"Effect": "allow",
+				"Resources": [
+					"*"
+				]
+				}
+			]
+		}
+	]`
+
+	f.executeRequestForHandler(f.server.Handler, req, 200, resp)
+}
+
+func TestPolicyServer_DeleteNamespaceHandler(t *testing.T) {
+	f := newFixture(t)
+	_, err := f.server.storage.InsertPolicy(context.Background(), storage.NewPolicy([]storage.Statement{storage.NewStatement(storage.Allow, []string{"*"}, []string{"iam:CreatePolicy"})}))
+	if err != nil {
+		t.Fatalf("Could not insert policy: %v", err)
+	}
+
+	req, err := http.NewRequest("DELETE", "http://localhost:8080/policies/1", nil)
+	if err != nil {
+		t.Fatalf("Could not create request: %v", err)
+	}
+
+	f.executeRequestForHandler(f.server.Handler, req, 204, "")
+}
+
 type fixture struct {
 	server   *Server
 	recorder *httptest.ResponseRecorder
@@ -204,7 +346,7 @@ func (f *fixture) executeRequestForHandler(handler http.Handler, req *http.Reque
 	f.reset()
 	handler.ServeHTTP(f.recorder, req)
 	if f.recorder.Code != code {
-		f.t.Errorf("Expected status code %v, instead got: %v", code, f.recorder.Code)
+		f.t.Errorf("Expected status code %v, instead got: %v. body: %s", code, f.recorder.Code, f.recorder.Body.String())
 		return
 	}
 	if resp != "" {
