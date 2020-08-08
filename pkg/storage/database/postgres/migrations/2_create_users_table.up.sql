@@ -22,7 +22,7 @@ AS $$
 $$
 LANGUAGE sql;
 
-CREATE OR REPLACE FUNCTION query_policies_for_user(_name VARCHAR (300)))
+CREATE OR REPLACE FUNCTION query_policies_for_user(_name VARCHAR (300))
 RETURNS setof json
 AS $$
     WITH user AS (
