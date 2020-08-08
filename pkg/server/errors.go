@@ -6,7 +6,7 @@ const (
 	ErrConflict       = "/errors/conflict"
 	ErrNotFound       = "/errors/not-found"
 	ErrInternalServer = "/errors/internal-server"
-	ErrBadRequest = "/errors/bad-request"
+	ErrBadRequest     = "/errors/bad-request"
 )
 
 // ErrorResponse wraps the error neatly in a RFC7807 problem
@@ -52,7 +52,6 @@ func NewNotFoundError(title, detail string) *ErrorResponse {
 func NewBadRequest(title, detail string) *ErrorResponse {
 	return NewErrorResponse(ErrBadRequest, title, detail, 400)
 }
-
 
 // NewInternalServerError returns a new HTTP 500 Internal Server error with the given message
 func NewInternalServerError(title, detail string) *ErrorResponse {

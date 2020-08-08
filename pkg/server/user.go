@@ -34,7 +34,7 @@ func (s *UserServer) Init(r *mux.Router, middleware middleware.Middleware, stora
 	r.Handle("/{id:[0-9]+}", middleware(http.HandlerFunc(s.DeleteUserHandler))).Methods("DELETE")
 	r.Handle("/{id:[0-9]+}/policies/{policy_id:[0-9]+}", middleware(http.HandlerFunc(s.PostUserPolicyHandler))).Methods("POST")
 	r.Handle("/{id:[0-9]+}/policies/", middleware(http.HandlerFunc(s.GetUserPolicyHandler))).Methods("GET")
-	
+
 	s.router = r
 	s.storage = storage
 }
@@ -136,7 +136,6 @@ func (s *UserServer) PostUserPolicyHandler(w http.ResponseWriter, r *http.Reques
 
 	w.WriteHeader(200)
 }
-
 
 // GetUserPolicyHandler handles Get requests on the user policy resource by ID
 func (s *UserServer) GetUserPolicyHandler(w http.ResponseWriter, r *http.Request) {

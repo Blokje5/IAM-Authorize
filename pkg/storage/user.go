@@ -35,7 +35,7 @@ func (s *Storage) GetUser(ctx context.Context, ID int64) (*User, error) {
 }
 
 // DeleteUser returns a User based on the ID
-func (s *Storage) DeleteUser(ctx context.Context, ID int64) (error) {
+func (s *Storage) DeleteUser(ctx context.Context, ID int64) error {
 	_, err := s.db.ExecContext(ctx, "DELETE FROM users WHERE id=$1;", ID)
 	if err != nil {
 		return s.database.ProcessError(err)
