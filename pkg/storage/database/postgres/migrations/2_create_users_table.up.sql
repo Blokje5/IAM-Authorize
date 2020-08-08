@@ -25,15 +25,17 @@ LANGUAGE sql;
 CREATE OR REPLACE FUNCTION query_policies_for_user(_name VARCHAR (300))
 RETURNS setof json
 AS $$
-    WITH user AS (
+    WITH query_user AS (
         SELECT id
         FROM users
         WHERE name = _name
-    ), user_policies AS (
+    ), 
+    user_policies AS (
         SELECT policy_id AS id
         FROM users_policies
-        INNER JOIN user ON user.id = users_policies.user_id
-    ), data AS (
+        INNER JOIN query_user ON query_user.id = users_policies.user_id
+    ), 
+    data AS (
         SELECT
             p.id,
             p.version,

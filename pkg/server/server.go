@@ -29,6 +29,7 @@ type Server struct {
 	router *mux.Router
 	NamespaceServer
 	PolicyServer
+	UserServer
 
 	logger  *log.Logger
 	storage *storage.Storage
@@ -71,6 +72,9 @@ func (s *Server) Init(ctx context.Context) error {
 
 	pr := r.PathPrefix("/policies").Subrouter()
 	s.PolicyServer.Init(pr, middleware, storage)
+
+	ur := r.PathPrefix("/users").Subrouter()
+	s.UserServer.Init(ur, middleware, storage)
 	s.logger.Debug("Completed Initializing routers")
 
 	s.Handler = r

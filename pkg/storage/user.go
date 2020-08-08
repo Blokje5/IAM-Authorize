@@ -12,15 +12,15 @@ type User struct {
 }
 
 // InsertUser inserts the User into the database and returns the User with id
-func (s *Storage) InsertUser(ctx context.Context, user User) (*User, error) {
+func (s *Storage) InsertUser(ctx context.Context, user *User) (*User, error) {
 	var ID int64
-	err := s.db.QueryRowContext(ctx, "SELECT insert_user($1, $2, $3, $4, $5)", user.Name, user.audit.createdBy, user.audit.createdBy, user.audit.createdAt, user.audit.createdAt).Scan(&ID)
+	err := s.db.QueryRowContext(ctx, "SELECT insert_user($1, $2, $3, $4, $5)", &user.Name, &user.audit.createdBy, &user.audit.createdBy, &user.audit.createdAt, &user.audit.createdAt).Scan(&ID)
 	if err != nil {
 		return nil, s.database.ProcessError(err)
 	}
 
 	user.ID = ID
-	return &user, nil
+	return user, nil
 }
 
 // GetUser returns a User based on the ID

@@ -294,6 +294,39 @@ func TestPolicyServer_DeleteNamespaceHandler(t *testing.T) {
 	f.executeRequestForHandler(f.server.Handler, req, 204, "")
 }
 
+func TestUserServer_PostUserHandler(t *testing.T) {
+	f := newFixture(t)
+	body := `{
+		"name": "test"
+	}`
+	req, err := http.NewRequest("POST", "http://localhost:8080/users/", strings.NewReader(body))
+	if err != nil {
+		t.Fatalf("Could not create request: %v", err)
+	}
+
+	resp := `{
+		"id": 1,
+		"name": "test"
+	}`
+
+	f.executeRequestForHandler(f.server.Handler, req, 200, resp)
+
+	req, err = http.NewRequest("POST", "http://localhost:8080/users/", strings.NewReader(body))
+	if err != nil {
+		t.Fatalf("Could not create request: %v", err)
+	}
+
+	resp = `{
+		"type":"http://localhost:8080/errors/conflict",
+		"status": 409,
+		"title":"Conflict",
+		"detail":"Uniqueness constraint violation"
+	}`
+
+	f.executeRequestForHandler(f.server.Handler, req, 409, resp)
+}
+
+
 type fixture struct {
 	server   *Server
 	recorder *httptest.ResponseRecorder
