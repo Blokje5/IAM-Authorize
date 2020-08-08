@@ -33,6 +33,7 @@ func (s *UserServer) Init(r *mux.Router, middleware middleware.Middleware, stora
 	r.Handle("/{id:[0-9]+}", middleware(http.HandlerFunc(s.GetUserHandler))).Methods("GET")
 	r.Handle("/{id:[0-9]+}", middleware(http.HandlerFunc(s.DeleteUserHandler))).Methods("DELETE")
 	r.Handle("/{id:[0-9]+}/policies/{policy_id:[0-9]+}", middleware(http.HandlerFunc(s.PostUserPolicyHandler))).Methods("POST")
+	r.Handle("/{id:[0-9]+}/policies/", middleware(http.HandlerFunc(s.GetUserPolicyHandler))).Methods("GET")
 	
 	s.router = r
 	s.storage = storage
@@ -134,4 +135,35 @@ func (s *UserServer) PostUserPolicyHandler(w http.ResponseWriter, r *http.Reques
 	}
 
 	w.WriteHeader(200)
+}
+
+
+// GetUserPolicyHandler handles Get requests on the user policy resource by ID
+func (s *UserServer) GetUserPolicyHandler(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	vars := mux.Vars(r)
+	ID, err := strconv.ParseInt(vars["id"], 10, 64)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	user, err := s.storage.GetUser(ctx, ID)
+	if err != nil || user == nil {
+		http.Error(w, NewNotFoundError("Not Found", fmt.Sprintf("User with ID: %v not found", ID)).Error(), http.StatusNotFound)
+		return
+	}
+
+	policies, err := s.storage.GetPoliciesForUser(ctx, user)
+	if err != nil {
+		http.Error(w, NewInternalServerError("Internal server error", err.Error()).Error(), http.StatusInternalServerError)
+		return
+	}
+
+	encoder := json.NewEncoder(w)
+	err = encoder.Encode(policies)
+	if err != nil {
+		http.Error(w, NewInternalServerError("Internal server error", err.Error()).Error(), http.StatusInternalServerError)
+		return
+	}
 }

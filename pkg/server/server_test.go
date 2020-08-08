@@ -409,6 +409,58 @@ func TestUserServer_PostUserPolicyHandler(t *testing.T) {
 	f.executeRequestForHandler(f.server.Handler, req, 200, "")
 }
 
+func TestUserServer_GetUserPolicyHandler(t *testing.T) {
+	f := newFixture(t)
+	req, err := http.NewRequest("GET", "http://localhost:8080/users/1/policies/", nil)
+	if err != nil {
+		t.Fatalf("Could not create request: %v", err)
+	}
+
+	resp := `{
+		"type":"http://localhost:8080/errors/not-found",
+		"title":"Not Found",
+		"detail":"User with ID: 1 not found",
+		"status":404
+	}`
+
+	f.executeRequestForHandler(f.server.Handler, req, 404, resp)
+
+	_, err = f.server.storage.InsertPolicy(context.Background(), storage.NewPolicy([]storage.Statement{storage.NewStatement(storage.Allow, []string{"*"}, []string{"iam:CreatePolicy"})}))
+	if err != nil {
+		t.Fatalf("Could not insert policy: %v", err)
+	}
+
+	_, err = f.server.storage.InsertUser(context.Background(), &storage.User{Name: "test"})
+	if err != nil {
+		t.Fatalf("Could not insert user: %v", err)
+	}
+
+	req, err = http.NewRequest("GET", "http://localhost:8080/users/1/policies/", nil)
+	if err != nil {
+		t.Fatalf("Could not create request: %v", err)
+	}
+
+	resp = `[
+		{
+			"id": 1,
+			"version": "v1",
+			"statements": [
+				{
+				"Actions": [
+					"iam:CreatePolicy"
+				],
+				"Effect": "allow",
+				"Resources": [
+					"*"
+				]
+				}
+			]
+		}
+	]`
+
+	f.executeRequestForHandler(f.server.Handler, req, 200, "")
+}
+
 type fixture struct {
 	server   *Server
 	recorder *httptest.ResponseRecorder
