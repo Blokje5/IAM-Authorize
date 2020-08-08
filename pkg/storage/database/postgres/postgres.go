@@ -88,6 +88,8 @@ func (p *Postgres) ProcessError(err error) error {
 
 func (p *Postgres) handlePGError(e *pq.Error) error {
 	switch e.Code {
+	case "23503":
+		return storage.ErrForeignKeyViolation
 	case "23505": // Unique violation
 		return storage.ErrUniqueViolation
 	}

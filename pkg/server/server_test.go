@@ -375,6 +375,39 @@ func TestUserServer_DeleteUserHandler(t *testing.T) {
 	f.executeRequestForHandler(f.server.Handler, req, 204, "")
 }
 
+func TestUserServer_PostUserPolicyHandler(t *testing.T) {
+	f := newFixture(t)
+	req, err := http.NewRequest("POST", "http://localhost:8080/users/1/policies/1", nil)
+	if err != nil {
+		t.Fatalf("Could not create request: %v", err)
+	}
+
+	resp := `{
+		"type":"http://localhost:8080/errors/bad-request",
+		"title":"Bad Request",
+		"detail":"Foreign key violation",
+		"status":400
+	}`
+
+	f.executeRequestForHandler(f.server.Handler, req, 400, resp)
+
+	_, err = f.server.storage.InsertPolicy(context.Background(), storage.NewPolicy([]storage.Statement{storage.NewStatement(storage.Allow, []string{"*"}, []string{"iam:CreatePolicy"})}))
+	if err != nil {
+		t.Fatalf("Could not insert policy: %v", err)
+	}
+
+	_, err = f.server.storage.InsertUser(context.Background(), &storage.User{Name: "test"})
+	if err != nil {
+		t.Fatalf("Could not insert user: %v", err)
+	}
+
+	req, err = http.NewRequest("POST", "http://localhost:8080/users/1/policies/1", nil)
+	if err != nil {
+		t.Fatalf("Could not create request: %v", err)
+	}
+
+	f.executeRequestForHandler(f.server.Handler, req, 200, "")
+}
 
 type fixture struct {
 	server   *Server

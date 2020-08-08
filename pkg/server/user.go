@@ -32,7 +32,8 @@ func (s *UserServer) Init(r *mux.Router, middleware middleware.Middleware, stora
 	r.Handle("/", middleware(http.HandlerFunc(s.PostUserHandler))).Methods("POST")
 	r.Handle("/{id:[0-9]+}", middleware(http.HandlerFunc(s.GetUserHandler))).Methods("GET")
 	r.Handle("/{id:[0-9]+}", middleware(http.HandlerFunc(s.DeleteUserHandler))).Methods("DELETE")
-
+	r.Handle("/{id:[0-9]+}/policies/{policy_id:[0-9]+}", middleware(http.HandlerFunc(s.PostUserPolicyHandler))).Methods("POST")
+	
 	s.router = r
 	s.storage = storage
 }
@@ -106,4 +107,31 @@ func (s *UserServer) DeleteUserHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(204)
+}
+
+func (s *UserServer) PostUserPolicyHandler(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	vars := mux.Vars(r)
+	ID, err := strconv.ParseInt(vars["id"], 10, 64)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	policyID, err := strconv.ParseInt(vars["policy_id"], 10, 64)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	err = s.storage.InsertPolicyForUser(ctx, ID, policyID)
+	if err != nil {
+		if err == storage.ErrForeignKeyViolation {
+			http.Error(w, NewBadRequest("Bad Request", err.Error()).Error(), http.StatusBadRequest)
+		} else {
+			http.Error(w, NewInternalServerError("Internal server error", err.Error()).Error(), http.StatusInternalServerError)
+		}
+	}
+
+	w.WriteHeader(200)
 }
