@@ -80,7 +80,6 @@ func (s *Storage) GetPolicy(ctx context.Context, ID int64) (*Policy, error) {
 	var policy Policy
 	err := s.db.QueryRowContext(ctx, `SELECT query_policy($1);`, ID).Scan(&policy)
 	if err != nil {
-		fmt.Println(err)
 		return nil, s.database.ProcessError(err)
 	}
 
@@ -91,7 +90,6 @@ func (s *Storage) ListPolicies(ctx context.Context) ([]Policy, error) {
 	policies := []Policy{}
 	rows, err := s.db.QueryContext(ctx, `SELECT query_policies();`)
 	if err != nil {
-		fmt.Println(err)
 		return nil, s.database.ProcessError(err)
 	}
 	defer func() {

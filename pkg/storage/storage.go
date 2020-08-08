@@ -34,6 +34,19 @@ func (s *Storage) Clean(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
+	_, err = s.db.ExecContext(ctx, "TRUNCATE TABLE users_policies;")
+	if err != nil {
+		return err
+	}
+
+	_, err = s.db.ExecContext(ctx, "ALTER SEQUENCE users_id_seq RESTART WITH 1;")
+	if err != nil {
+		return err
+	}
+	_, err = s.db.ExecContext(ctx, "TRUNCATE TABLE users CASCADE;")
+	if err != nil {
+		return err
+	}
 
 	_, err = s.db.ExecContext(ctx, "TRUNCATE TABLE statements;")
 	if err != nil {
