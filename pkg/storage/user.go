@@ -26,7 +26,7 @@ func (s *Storage) InsertUser(ctx context.Context, user *User) (*User, error) {
 // GetUser returns a User based on the ID
 func (s *Storage) GetUser(ctx context.Context, ID int64) (*User, error) {
 	var user User
-	err := s.db.QueryRowContext(ctx, `SELECT id, name, created_by, last_modified_by, created_at, last_modified_at WHERE id=$1;`, ID).Scan(&user.ID, &user.Name, &user.audit.createdBy, &user.audit.lastModifiedBy, &user.audit.createdAt, &user.audit.lastModifiedAt)
+	err := s.db.QueryRowContext(ctx, `SELECT id, name, created_by, last_modified_by, created_at, last_modified_at FROM users WHERE id=$1;`, ID).Scan(&user.ID, &user.Name, &user.audit.createdBy, &user.audit.lastModifiedBy, &user.audit.createdAt, &user.audit.lastModifiedAt)
 	if err != nil {
 		return nil, s.database.ProcessError(err)
 	}
@@ -36,7 +36,7 @@ func (s *Storage) GetUser(ctx context.Context, ID int64) (*User, error) {
 
 // DeleteUser returns a User based on the ID
 func (s *Storage) DeleteUser(ctx context.Context, ID int64) (error) {
-	_, err := s.db.ExecContext(ctx, "DELETE FROM user WHERE id=$1;", ID)
+	_, err := s.db.ExecContext(ctx, "DELETE FROM users WHERE id=$1;", ID)
 	if err != nil {
 		return s.database.ProcessError(err)
 	}

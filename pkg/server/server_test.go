@@ -152,7 +152,7 @@ func TestNamespaceServer_PutNamespaceHandler(t *testing.T) {
 	f.executeRequestForHandler(f.server.Handler, req, 200, resp)
 }
 
-func TestPolicyServer_GetNamespaceHandler(t *testing.T) {
+func TestPolicyServer_GetPolicyHandler(t *testing.T) {
 	f := newFixture(t)
 
 	req, err := http.NewRequest("GET", "http://localhost:8080/policies/1", nil)
@@ -237,7 +237,7 @@ func TestPolicyServer_PostNamespaceHandler(t *testing.T) {
 	f.executeRequestForHandler(f.server.Handler, req, 200, resp)
 }
 
-func TestPolicyServer_ListNamespaceHandler(t *testing.T) {
+func TestPolicyServer_ListPolicyHandler(t *testing.T) {
 	f := newFixture(t)
 	req, err := http.NewRequest("GET", "http://localhost:8080/policies/", nil)
 	if err != nil {
@@ -279,7 +279,7 @@ func TestPolicyServer_ListNamespaceHandler(t *testing.T) {
 	f.executeRequestForHandler(f.server.Handler, req, 200, resp)
 }
 
-func TestPolicyServer_DeleteNamespaceHandler(t *testing.T) {
+func TestPolicyServer_DeletePolicyHandler(t *testing.T) {
 	f := newFixture(t)
 	_, err := f.server.storage.InsertPolicy(context.Background(), storage.NewPolicy([]storage.Statement{storage.NewStatement(storage.Allow, []string{"*"}, []string{"iam:CreatePolicy"})}))
 	if err != nil {
@@ -324,6 +324,40 @@ func TestUserServer_PostUserHandler(t *testing.T) {
 	}`
 
 	f.executeRequestForHandler(f.server.Handler, req, 409, resp)
+}
+
+func TestUsereServer_GetUsereHandler(t *testing.T) {
+	f := newFixture(t)
+	req, err := http.NewRequest("GET", "http://localhost:8080/users/1", nil)
+	if err != nil {
+		t.Fatalf("Could not create request: %v", err)
+	}
+
+	resp := `{
+		"type":"http://localhost:8080/errors/not-found",
+		"status": 404,
+		"title":"Not Found",
+		"detail":"User with ID: 1 not found"
+	}`
+
+	f.executeRequestForHandler(f.server.Handler, req, 404, resp)
+
+	_, err = f.server.storage.InsertUser(context.Background(), &storage.User{Name: "test"})
+	if err != nil {
+		t.Fatalf("Could not insert user: %v", err)
+	}
+
+	req, err = http.NewRequest("GET", "http://localhost:8080/users/1", nil)
+	if err != nil {
+		t.Fatalf("Could not create request: %v", err)
+	}
+
+	resp = `{
+		"id": 1,
+		"name": "test"
+	}`
+
+	f.executeRequestForHandler(f.server.Handler, req, 200, resp)
 }
 
 

@@ -2,7 +2,9 @@ package server
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/blokje5/iam-server/pkg/log"
 	"github.com/blokje5/iam-server/pkg/server/middleware"
@@ -28,6 +30,7 @@ func NewUserServer() *UserServer {
 
 func (s *UserServer) Init(r *mux.Router, middleware middleware.Middleware, storage *storage.Storage) {
 	r.Handle("/", middleware(http.HandlerFunc(s.PostUserHandler))).Methods("POST")
+	r.Handle("/{id:[0-9]+}", middleware(http.HandlerFunc(s.GetUserHandler))).Methods("GET")
 
 	s.router = r
 	s.storage = storage
@@ -51,6 +54,30 @@ func (s *UserServer) PostUserHandler(w http.ResponseWriter, r *http.Request) {
 		} else {
 			http.Error(w, NewInternalServerError("Internal server error", err.Error()).Error(), http.StatusInternalServerError)
 		}
+		return
+	}
+
+	encoder := json.NewEncoder(w)
+	err = encoder.Encode(user)
+	if err != nil {
+		http.Error(w, NewInternalServerError("Internal server error", err.Error()).Error(), http.StatusInternalServerError)
+		return
+	}
+}
+
+// GetUserHandler handles Get requests on the User resource by ID
+func (s *UserServer) GetUserHandler(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	vars := mux.Vars(r)
+	ID, err := strconv.ParseInt(vars["id"], 10, 64)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	user, err := s.storage.GetUser(ctx, ID)
+	if err != nil || user == nil {
+		http.Error(w, NewNotFoundError("Not Found", fmt.Sprintf("User with ID: %v not found", ID)).Error(), http.StatusNotFound)
 		return
 	}
 
