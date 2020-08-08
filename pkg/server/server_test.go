@@ -360,6 +360,21 @@ func TestUsereServer_GetUsereHandler(t *testing.T) {
 	f.executeRequestForHandler(f.server.Handler, req, 200, resp)
 }
 
+func TestUserServer_DeleteUserHandler(t *testing.T) {
+	f := newFixture(t)
+	_, err := f.server.storage.InsertUser(context.Background(), &storage.User{Name: "test"})
+	if err != nil {
+		t.Fatalf("Could not insert user: %v", err)
+	}
+
+	req, err := http.NewRequest("DELETE", "http://localhost:8080/users/1", nil)
+	if err != nil {
+		t.Fatalf("Could not create request: %v", err)
+	}
+
+	f.executeRequestForHandler(f.server.Handler, req, 204, "")
+}
+
 
 type fixture struct {
 	server   *Server

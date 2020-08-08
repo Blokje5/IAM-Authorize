@@ -31,6 +31,7 @@ func NewUserServer() *UserServer {
 func (s *UserServer) Init(r *mux.Router, middleware middleware.Middleware, storage *storage.Storage) {
 	r.Handle("/", middleware(http.HandlerFunc(s.PostUserHandler))).Methods("POST")
 	r.Handle("/{id:[0-9]+}", middleware(http.HandlerFunc(s.GetUserHandler))).Methods("GET")
+	r.Handle("/{id:[0-9]+}", middleware(http.HandlerFunc(s.DeleteUserHandler))).Methods("DELETE")
 
 	s.router = r
 	s.storage = storage
@@ -87,4 +88,22 @@ func (s *UserServer) GetUserHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, NewInternalServerError("Internal server error", err.Error()).Error(), http.StatusInternalServerError)
 		return
 	}
+}
+
+// DeleteUserHandler handles Get requests on the User resource
+func (s *UserServer) DeleteUserHandler(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	vars := mux.Vars(r)
+	ID, err := strconv.ParseInt(vars["id"], 10, 64)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	err = s.storage.DeleteUser(ctx, ID)
+	if err != nil {
+		http.Error(w, NewInternalServerError("Internal server error", err.Error()).Error(), http.StatusInternalServerError)
+	}
+
+	w.WriteHeader(204)
 }
