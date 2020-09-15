@@ -33,6 +33,7 @@ type Server struct {
 	NamespaceServer
 	PolicyServer
 	UserServer
+	AuthzServer
 
 	logger  *log.Logger
 	storage *storage.Storage
@@ -87,6 +88,9 @@ func (s *Server) Init(ctx context.Context) error {
 
 	ur := r.PathPrefix("/users").Subrouter()
 	s.UserServer.Init(ur, middleware, storage)
+
+	ar := r.PathPrefix("/authz").Subrouter()
+	s.AuthzServer.Init(ar, middleware, storage, engine)
 	s.logger.Debug("Completed Initializing routers")
 
 	s.Handler = r

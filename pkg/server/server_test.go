@@ -461,6 +461,23 @@ func TestUserServer_GetUserPolicyHandler(t *testing.T) {
 	f.executeRequestForHandler(f.server.Handler, req, 200, "")
 }
 
+func TestAuthzServer_PostAuthzHandler(t *testing.T) {
+	f := newFixture(t)
+	body := `{
+		"userID": 1,
+		"action": "iam:CreateUser",
+		"resouce": "iam:1"
+	}`
+	req, err := http.NewRequest("POST", "http://localhost:8080/authz/", strings.NewReader(body))
+	if err != nil {
+		t.Fatalf("Could not create request: %v", err)
+	}
+
+	resp := `false`
+
+	f.executeRequestForHandler(f.server.Handler, req, 200, resp)
+}
+
 type fixture struct {
 	server   *Server
 	recorder *httptest.ResponseRecorder
@@ -476,7 +493,7 @@ func newFixture(t *testing.T) *fixture {
 	connString = "postgresql://postgres@127.0.0.1:5432/iam_test?sslmode=disable&password=local"
 	params.ConnectionString = connString
 	params.MigrationPath = "../storage/database/postgres/migrations"
-
+	params.PolicyPath = "../engine/policy"
 	server := New(params)
 	if err := server.Init(ctx); err != nil {
 		t.Fatalf("Could not start server: %v", err)

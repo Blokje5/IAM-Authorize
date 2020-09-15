@@ -13,9 +13,9 @@ import (
 
 // Input represents the expected query input
 type Input struct {
-	UserID int
-	Action string
-	Resource string
+	UserID int `json:"userId"`
+	Action string `json:"action"`
+	Resource string `json:"resource"`
 }
 
 // Engine is the policy engine that executes authorization queries
