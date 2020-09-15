@@ -2,11 +2,13 @@ package server
 
 import (
 	"context"
+	"net/http"
+
 	"github.com/blokje5/iam-server/pkg/log"
 	"github.com/blokje5/iam-server/pkg/server/middleware"
 	"github.com/blokje5/iam-server/pkg/storage"
 	"github.com/blokje5/iam-server/pkg/storage/database/postgres"
-	"net/http"
+	"github.com/blokje5/iam-server/pkg/engine/policy"
 
 	"github.com/gorilla/mux"
 )
@@ -34,6 +36,7 @@ type Server struct {
 	logger  *log.Logger
 	storage *storage.Storage
 	params  *Params
+	engine *policy.Engine
 }
 
 // New returns a new instance of the Server
@@ -41,6 +44,7 @@ func New(params *Params) *Server {
 	s := Server{
 		params: params,
 		logger: log.GetLogger(),
+		engine: &policy.Engine{}, //TODO use load method properly
 	}
 	return &s
 }
