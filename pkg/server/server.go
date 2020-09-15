@@ -2,11 +2,13 @@ package server
 
 import (
 	"context"
+	"net/http"
+
+	"github.com/blokje5/iam-server/pkg/engine"
 	"github.com/blokje5/iam-server/pkg/log"
 	"github.com/blokje5/iam-server/pkg/server/middleware"
 	"github.com/blokje5/iam-server/pkg/storage"
 	"github.com/blokje5/iam-server/pkg/storage/database/postgres"
-	"net/http"
 
 	"github.com/gorilla/mux"
 )
@@ -15,6 +17,7 @@ import (
 type Params struct {
 	ConnectionString string
 	MigrationPath    string
+	PolicyPath       string
 }
 
 // NewParams returns a pointer to a new instance of the params struct
@@ -30,10 +33,12 @@ type Server struct {
 	NamespaceServer
 	PolicyServer
 	UserServer
+	AuthzServer
 
 	logger  *log.Logger
 	storage *storage.Storage
 	params  *Params
+	engine  *engine.Engine
 }
 
 // New returns a new instance of the Server
@@ -65,6 +70,14 @@ func (s *Server) Init(ctx context.Context) error {
 	storage := storage.New(db, pdb)
 	s.storage = storage
 
+	s.logger.Debug("Starting engine initialization")
+	engine, err := engine.Load([]string{s.params.PolicyPath})
+	if err != nil {
+		return err
+	}
+	s.engine = engine
+	s.logger.Debug("Completed engine initialization")
+
 	s.logger.Debug("Initializing routers")
 	nr := r.PathPrefix("/namespaces").Subrouter()
 	middleware := middleware.NewLoggingMiddleware(s.logger)
@@ -75,6 +88,9 @@ func (s *Server) Init(ctx context.Context) error {
 
 	ur := r.PathPrefix("/users").Subrouter()
 	s.UserServer.Init(ur, middleware, storage)
+
+	ar := r.PathPrefix("/authz").Subrouter()
+	s.AuthzServer.Init(ar, middleware, storage, engine)
 	s.logger.Debug("Completed Initializing routers")
 
 	s.Handler = r

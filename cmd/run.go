@@ -32,6 +32,7 @@ func run() {
 
 	params := server.NewParams()
 	params.MigrationPath = "pkg/storage/database/postgres/migrations"
+	params.PolicyPath = "pkg/engine/policy"
 	viper.Unmarshal(&params)
 	server := server.New(params)
 	if err := server.Init(ctx); err != nil {
