@@ -8,7 +8,7 @@ import (
 	"github.com/blokje5/iam-server/pkg/server/middleware"
 	"github.com/blokje5/iam-server/pkg/storage"
 	"github.com/blokje5/iam-server/pkg/storage/database/postgres"
-	"github.com/blokje5/iam-server/pkg/engine/policy"
+	"github.com/blokje5/iam-server/pkg/engine"
 
 	"github.com/gorilla/mux"
 )
@@ -17,6 +17,7 @@ import (
 type Params struct {
 	ConnectionString string
 	MigrationPath    string
+	PolicyPath string
 }
 
 // NewParams returns a pointer to a new instance of the params struct
@@ -36,7 +37,7 @@ type Server struct {
 	logger  *log.Logger
 	storage *storage.Storage
 	params  *Params
-	engine *policy.Engine
+	engine *engine.Engine
 }
 
 // New returns a new instance of the Server
@@ -44,7 +45,6 @@ func New(params *Params) *Server {
 	s := Server{
 		params: params,
 		logger: log.GetLogger(),
-		engine: &policy.Engine{}, //TODO use load method properly
 	}
 	return &s
 }
@@ -68,6 +68,14 @@ func (s *Server) Init(ctx context.Context) error {
 	}
 	storage := storage.New(db, pdb)
 	s.storage = storage
+
+	s.logger.Debug("Starting engine initialization")
+	engine, err := engine.Load([]string{s.params.PolicyPath})
+	if err != nil {
+		return err
+	}
+	s.engine = engine
+	s.logger.Debug("Completed engine initialization")
 
 	s.logger.Debug("Initializing routers")
 	nr := r.PathPrefix("/namespaces").Subrouter()
