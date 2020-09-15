@@ -13,21 +13,21 @@ import (
 
 // Input represents the expected query input
 type Input struct {
-	UserID int `json:"userId"`
-	Action string `json:"action"`
+	UserID   int    `json:"userId"`
+	Action   string `json:"action"`
 	Resource string `json:"resource"`
 }
 
 // Engine is the policy engine that executes authorization queries
 type Engine struct {
 	compiler *ast.Compiler
-	store storage.Store
+	store    storage.Store
 }
 
 func (e *Engine) Query(ctx context.Context, input Input) (bool, error) {
 	query := "data.main.authorized"
 
-	options := []func(r *rego.Rego) {
+	options := []func(r *rego.Rego){
 		rego.Input(input),
 		rego.Query(query),
 		rego.Compiler(e.compiler),
@@ -94,7 +94,7 @@ func Load(paths []string) (*Engine, error) {
 	}
 
 	e := &Engine{
-		store: store,
+		store:    store,
 		compiler: compiler,
 	}
 

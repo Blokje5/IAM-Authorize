@@ -19,7 +19,7 @@ type AuthzServer struct {
 
 	logger  *log.Logger
 	decoder json.Decoder
-	engine *engine.Engine
+	engine  *engine.Engine
 }
 
 // NewAuthzServer returns a new instance of the Authz Server

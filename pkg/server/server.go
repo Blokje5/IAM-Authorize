@@ -4,11 +4,11 @@ import (
 	"context"
 	"net/http"
 
+	"github.com/blokje5/iam-server/pkg/engine"
 	"github.com/blokje5/iam-server/pkg/log"
 	"github.com/blokje5/iam-server/pkg/server/middleware"
 	"github.com/blokje5/iam-server/pkg/storage"
 	"github.com/blokje5/iam-server/pkg/storage/database/postgres"
-	"github.com/blokje5/iam-server/pkg/engine"
 
 	"github.com/gorilla/mux"
 )
@@ -17,7 +17,7 @@ import (
 type Params struct {
 	ConnectionString string
 	MigrationPath    string
-	PolicyPath string
+	PolicyPath       string
 }
 
 // NewParams returns a pointer to a new instance of the params struct
@@ -38,7 +38,7 @@ type Server struct {
 	logger  *log.Logger
 	storage *storage.Storage
 	params  *Params
-	engine *engine.Engine
+	engine  *engine.Engine
 }
 
 // New returns a new instance of the Server
