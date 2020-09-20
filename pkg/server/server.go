@@ -39,6 +39,7 @@ type Server struct {
 	storage *storage.Storage
 	params  *Params
 	engine  *engine.Engine
+	refresher *PolicyRefresher
 }
 
 // New returns a new instance of the Server
@@ -94,6 +95,13 @@ func (s *Server) Init(ctx context.Context) error {
 	s.logger.Debug("Completed Initializing routers")
 
 	s.Handler = r
+
+	s.logger.Debug("Start refresher")
+	refresher := NewPolicyRefresher(engine, storage)
+	refresher.Run(ctx)
+	s.refresher = refresher
+
+	s.logger.Debug("Completed server initialization")
 	return nil
 }
 

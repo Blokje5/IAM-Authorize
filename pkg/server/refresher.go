@@ -54,6 +54,7 @@ func (p *PolicyRefresher) refresh(ctx context.Context) error {
 	}
 
 	p.engine.SetPolicies(ctx, refreshMap)
+	return nil
 }
 
 func (p *PolicyRefresher) getRefreshMap(ctx context.Context) (map[int64][]storage.Policy, error) {
