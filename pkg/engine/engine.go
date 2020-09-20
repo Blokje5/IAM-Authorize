@@ -66,9 +66,10 @@ func reduceBoolList(list []bool) bool {
 	return true
 }
 
-func (e *Engine) SetPolicies(ctx context.Context, refreshMap map[int64][]internalStorage.Policy) *Engine {
+func (e *Engine) SetPolicies(ctx context.Context, policyMap map[int64]internalStorage.Policy, userMap map[int64][]int64) *Engine {
 	e.store = inmem.NewFromObject(map[string]interface{}{
-		"users": refreshMap,
+		"policies": policyMap,
+		"users": userMap,
 	})
 
 	return e

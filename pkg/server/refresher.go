@@ -48,30 +48,50 @@ func (p *PolicyRefresher) run(ctx context.Context) {
 }
 
 func (p *PolicyRefresher) refresh(ctx context.Context) error {
-	refreshMap, err := p.getRefreshMap(ctx)
+	userMap, err := p.getUserMap(ctx)
 	if err != nil {
 		return err
 	}
 
-	p.engine.SetPolicies(ctx, refreshMap)
+	policyMap, err := p.getPolicyMap(ctx)
+	if err != nil {
+		return err
+	}
+
+	p.engine.SetPolicies(ctx, policyMap, userMap)
 	return nil
 }
 
-func (p *PolicyRefresher) getRefreshMap(ctx context.Context) (map[int64][]storage.Policy, error) {
+func (p *PolicyRefresher) getUserMap(ctx context.Context) (map[int64][]int64, error) {
 	users, err := p.store.ListUser(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("list users for refresh: %w", err)
 	}
 
-	policyMap := make(map[int64][]storage.Policy)
+	userMap := make(map[int64][]int64)
 	
 	for _, user := range users {
-		policies, err := p.store.GetPoliciesForUser(ctx, &user)
+		policies, err := p.store.GetPolicyIDsForUser(ctx, &user)
 		if err != nil {
-			return nil, fmt.Errorf("list policies for refresh: %w", err)
+			return nil, fmt.Errorf("list policies IDs for refresh: %w", err)
 		}
 
-		policyMap[user.ID] = policies
+		userMap[user.ID] = policies
+	}
+
+	return userMap, nil
+}
+
+func (p *PolicyRefresher) getPolicyMap(ctx context.Context) (map[int64]storage.Policy, error) {
+	policies, err := p.store.ListPolicies(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("list policies for refresh: %w", err)
+	}
+
+	policyMap := make(map[int64]storage.Policy)
+	
+	for _, policy := range policies {
+		policyMap[policy.ID] = policy
 	}
 
 	return policyMap, nil
