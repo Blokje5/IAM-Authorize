@@ -39,10 +39,12 @@ func (p *PolicyRefresher) run(ctx context.Context) {
 		case <-ctx.Done():
 			return
 		case <-ticker.C:
+			p.log.Debug("Refresh in progress")
 			err := p.refresh(ctx)
 			if err != nil {
 				p.log.Errorf("Failed to refresh policies. %w", err)
 			}
+			p.log.Debug("Refresh completed")
 		}
 	}
 }
