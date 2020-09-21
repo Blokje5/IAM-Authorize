@@ -35,10 +35,10 @@ type Server struct {
 	UserServer
 	AuthzServer
 
-	logger  *log.Logger
-	storage *storage.Storage
-	params  *Params
-	engine  *engine.Engine
+	logger    *log.Logger
+	storage   *storage.Storage
+	params    *Params
+	engine    *engine.Engine
 	refresher *PolicyRefresher
 }
 

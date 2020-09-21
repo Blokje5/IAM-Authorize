@@ -13,7 +13,7 @@ import (
 // PolicyRefresher ensures the engine is kept up to date with the relevant data
 type PolicyRefresher struct {
 	engine *engine.Engine
-	store *storage.Storage
+	store  *storage.Storage
 
 	log *log.Logger
 }
@@ -21,7 +21,7 @@ type PolicyRefresher struct {
 func NewPolicyRefresher(engine *engine.Engine, store *storage.Storage) *PolicyRefresher {
 	return &PolicyRefresher{
 		engine: engine,
-		store: store,
+		store:  store,
 
 		log: log.GetLogger(),
 	}
@@ -71,7 +71,7 @@ func (p *PolicyRefresher) getUserMap(ctx context.Context) (map[int64][]int64, er
 	}
 
 	userMap := make(map[int64][]int64)
-	
+
 	for _, user := range users {
 		policies, err := p.store.GetPolicyIDsForUser(ctx, &user)
 		if err != nil {
@@ -91,7 +91,7 @@ func (p *PolicyRefresher) getPolicyMap(ctx context.Context) (map[int64]storage.P
 	}
 
 	policyMap := make(map[int64]storage.Policy)
-	
+
 	for _, policy := range policies {
 		policyMap[policy.ID] = policy
 	}

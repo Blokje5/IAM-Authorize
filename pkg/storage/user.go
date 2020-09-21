@@ -53,7 +53,6 @@ func (s *Storage) ListUser(ctx context.Context) ([]User, error) {
 		users = []User{}
 	}
 
-
 	return users, nil
 }
 
