@@ -23,6 +23,39 @@ func (s *Storage) InsertUser(ctx context.Context, user *User) (*User, error) {
 	return user, nil
 }
 
+// ListUser returns all Users
+func (s *Storage) ListUser(ctx context.Context) ([]User, error) {
+	var users []User
+	rows, err := s.db.QueryContext(ctx, `SELECT id, name, created_by, last_modified_by, created_at, last_modified_at FROM users;`)
+	if err != nil {
+		return nil, err
+	}
+	defer func() {
+		if err := rows.Close(); err != nil {
+			panic(err)
+		}
+	}()
+
+	for rows.Next() {
+		var user User
+		if err := rows.Scan(&user.ID, &user.Name, &user.audit.createdBy, &user.audit.lastModifiedBy, &user.audit.createdAt, &user.audit.lastModifiedAt); err != nil {
+			return nil, err
+		}
+		users = append(users, user)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	// Ensures we do not have to deal with nil pointers, instead we get an empty list
+	if len(users) == 0 {
+		users = []User{}
+	}
+
+	return users, nil
+}
+
 // GetUser returns a User based on the ID
 func (s *Storage) GetUser(ctx context.Context, ID int64) (*User, error) {
 	var user User

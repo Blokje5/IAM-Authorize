@@ -9,6 +9,8 @@ import (
 	"github.com/open-policy-agent/opa/rego"
 	"github.com/open-policy-agent/opa/storage"
 	"github.com/open-policy-agent/opa/storage/inmem"
+
+	internalStorage "github.com/blokje5/iam-server/pkg/storage"
 )
 
 // Input represents the expected query input
@@ -64,10 +66,10 @@ func reduceBoolList(list []bool) bool {
 	return true
 }
 
-func (e *Engine) SetPolicies(ctx context.Context, policyMap map[string]interface{}, roleMap map[string]interface{}) *Engine {
+func (e *Engine) SetPolicies(ctx context.Context, policyMap map[int64]internalStorage.Policy, userMap map[int64][]int64) *Engine {
 	e.store = inmem.NewFromObject(map[string]interface{}{
 		"policies": policyMap,
-		"roles":    roleMap,
+		"users":    userMap,
 	})
 
 	return e
